@@ -1,5 +1,4 @@
-// src/models/User.ts
-
+// src/models/User.ts - FIXED
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IUser extends Document {
@@ -87,11 +86,11 @@ const UserSchema: Schema<IUser> = new Schema(
   }
 );
 
-// Indexes
-UserSchema.index({ email: 1 });
-UserSchema.index({ user_id: 1 });
-UserSchema.index({ role_id: 1 });
-UserSchema.index({ is_active: 1 });
+// REMOVE THESE INDEX CALLS - they're creating duplicates
+// UserSchema.index({ email: 1 });
+// UserSchema.index({ user_id: 1 });
+// UserSchema.index({ role_id: 1 });
+// UserSchema.index({ is_active: 1 });
 
 // Auto-update updated_date on modifications
 UserSchema.pre("findOneAndUpdate", function () {

@@ -7,16 +7,25 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed": "node --import tsx config/preInstallation/preInst.ts"
+    "seed": "node --import tsx config/preInstallation/preInst.ts",
+    "generate-openapi": "node -e \"import('./lib/swagger.js').then(m => import('fs').then(fs => fs.writeFileSync('public/openapi.json', JSON.stringify(m.generateOpenApiSpec(), null, 2))))\"",
+    "generate-postman": "npm run generate-openapi && npx openapi2postmanv2 -s public/openapi.json -o public/postman-collection.json -p -O folderStrategy=Tags"
   },
   "dependencies": {
     "@faker-js/faker": "^10.1.0",
     "@radix-ui/react-avatar": "^1.1.11",
+    "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-menubar": "^1.1.16",
     "@radix-ui/react-popover": "^1.1.15",
+    "@radix-ui/react-scroll-area": "^1.2.10",
+    "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-switch": "^1.2.6",
+    "@scalar/api-reference-react": "^0.8.15",
+    "ajv": "^8.17.1",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -26,9 +35,12 @@
     "lucide-react": "^0.562.0",
     "mongoose": "^9.0.2",
     "next": "16.1.0",
+    "next-openapi-gen": "^0.9.1",
+    "next-swagger-doc": "^0.4.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "tailwind-merge": "^3.4.0"
+    "tailwind-merge": "^3.4.0",
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

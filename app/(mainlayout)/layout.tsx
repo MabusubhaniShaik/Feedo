@@ -17,7 +17,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         <HeaderComponent />
-        <main className="flex-1 overflow-auto p-6">{children}</main>
+        <main className="flex-1 overflow-auto p-2">{children}</main>
       </div>
     </div>
   );

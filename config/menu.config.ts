@@ -1,11 +1,4 @@
-import { 
-  Home, 
-  Users, 
-  Settings, 
-  BarChart3,
-  Bell,
-  FileText 
-} from "lucide-react";
+import { Home, Users, Settings, BarChart3, Bell, FileText } from "lucide-react";
 
 export interface MenuItem {
   href: string;
@@ -20,10 +13,15 @@ export const menuItems: MenuItem[] = [
     label: "Dashboard",
     icon: Home,
   },
- 
-    {
+
+  {
     href: "/product",
     label: "Product",
+    icon: FileText,
+  },
+  {
+    href: "/review",
+    label: "Review",
     icon: FileText,
   },
   {
@@ -31,17 +29,17 @@ export const menuItems: MenuItem[] = [
     label: "Reports",
     icon: FileText,
   },
-  {
-    href: "/notifications",
-    label: "Notifications",
-    icon: Bell,
-  },
+  // {
+  //   href: "/notifications",
+  //   label: "Notifications",
+  //   icon: Bell,
+  // },
   {
     href: "/settings",
     label: "Settings",
     icon: Settings,
   },
-   {
+  {
     href: "/manage",
     label: "Manage",
     icon: Users,
