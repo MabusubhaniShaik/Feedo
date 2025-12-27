@@ -1,31 +1,31 @@
 // app/layout.tsx
-import type { Metadata } from "next";
-import React from "react";
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import "./globals.css";
-import { connectDB } from "@/lib/db";
 
-export const metadata: Metadata = {
-  title: "Feedo App",
-  description: "Feedback collection platform",
-};
-
-const RootLayout = async ({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
-}) => {
-  await connectDB();
+}) {
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = sessionStorage.getItem("access_token");
+    const pathname = window.location.pathname;
+
+    if (!token && !["/", "/signin"].includes(pathname)) {
+      router.replace("/signin");
+    } else if (token && pathname === "/signin") {
+      router.replace("/dashboard");
+    }
+  }, []);
 
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className="min-h-screen antialiased"
-        suppressHydrationWarning
-      >
-        {children}
-      </body>
+    <html lang="en">
+      <body className="min-h-screen antialiased">{children}</body>
     </html>
   );
-};
-
-export default RootLayout;
+}

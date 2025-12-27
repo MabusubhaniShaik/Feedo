@@ -4,13 +4,12 @@ import { faker } from "@faker-js/faker";
 import { hashSync } from "bcryptjs";
 import dotenv from "dotenv";
 
-// Load environment variables
 dotenv.config({ path: ".env.local" });
 
 const DEFAULT_PASSWORD = "Password@123";
 const HASHED_PASSWORD = hashSync(DEFAULT_PASSWORD, 10);
 
-// Helper to generate user ID based on role
+// Helper to generate user ID
 const generateUserId = (roleName: string, count: number): string => {
   const year = new Date().getFullYear().toString().slice(-2);
   const prefix = roleName.toUpperCase().slice(0, 3);
@@ -18,7 +17,7 @@ const generateUserId = (roleName: string, count: number): string => {
   return `${prefix}${year}-${sequence}`;
 };
 
-// Generate user data
+// Generate user object
 const generateUser = (role_id: number, role_name: string, count: number) => {
   const firstName = faker.person.firstName();
   const lastName = faker.person.lastName();
@@ -31,7 +30,7 @@ const generateUser = (role_id: number, role_name: string, count: number) => {
     password: HASHED_PASSWORD,
     role_id: role_id.toString(),
     role_name,
-    isEmailVerified: faker.datatype.boolean(),
+    isEmailVerified: true,
     is_default_password: true,
     is_active: true,
     created_by: "SYSTEM",
@@ -41,7 +40,7 @@ const generateUser = (role_id: number, role_name: string, count: number) => {
   };
 };
 
-// Connect to database
+// MongoDB connection
 const connectDB = async () => {
   const mongoUri =
     process.env.MONGODB_URI ||
@@ -51,49 +50,45 @@ const connectDB = async () => {
   console.log("Connected to MongoDB");
 };
 
-// Main execution
+// Main runner
 const main = async () => {
   try {
-    // Connect to database
     await connectDB();
 
     console.log("Starting user seeding...");
 
-    // Get the "user" collection directly
     const db: any = mongoose.connection.db;
-    const userCollection = db.collection("user"); // Singular "user"
+    const userCollection = db.collection("user");
 
-    // Clear existing users first
+    // Clear users
     await userCollection.deleteMany({});
-    console.log("Cleared existing users");
+    console.log("🧹 Cleared existing users");
 
-    // Generate admin users
-    const adminUsers = Array.from({ length: 3 }, (_, index) =>
-      generateUser(1, "Admin", index + 1)
+    const users = [
+      // 1 Owner
+      generateUser(0, "Owner", 1),
+
+      // 1 Admin
+      generateUser(1, "Admin", 1),
+
+      // 18 Users
+      ...Array.from({ length: 18 }, (_, i) => generateUser(2, "User", i + 1)),
+    ];
+
+    await userCollection.insertMany(users);
+
+    console.log("Seeded users successfully");
+    console.log("Owner: 1 | Admin: 1 | Users: 18");
+
+    const total = await userCollection.countDocuments();
+    console.log(`Total users: ${total}`);
+
+    // Preview
+    const preview = await userCollection.find().limit(5).toArray();
+    console.log("👀 Sample users:");
+    preview.forEach((u: any) =>
+      console.log(`- ${u.user_id} | ${u.role_name} | ${u.email}`)
     );
-
-    // Generate regular users
-    const regularUsers = Array.from({ length: 5 }, (_, index) =>
-      generateUser(2, "User", index + 1)
-    );
-
-    // Insert all users
-    await userCollection.insertMany([...adminUsers, ...regularUsers]);
-
-    console.log(`Seeded ${adminUsers.length} Admin users`);
-    console.log(`Seeded ${regularUsers.length} User users`);
-    console.log("User seeding completed");
-
-    // Verify
-    const totalUsers = await userCollection.countDocuments();
-    console.log(`Total users in 'user' collection: ${totalUsers}`);
-
-    // Show a few sample users
-    const sampleUsers = await userCollection.find().limit(3).toArray();
-    console.log("Sample users:");
-    sampleUsers.forEach((user: any) => {
-      console.log(`- ${user.user_id}: ${user.name} (${user.email})`);
-    });
   } catch (error) {
     console.error("User seeding failed:", error);
     process.exit(1);
@@ -103,5 +98,4 @@ const main = async () => {
   }
 };
 
-// Run the script
 main();

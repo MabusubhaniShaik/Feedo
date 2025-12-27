@@ -70,7 +70,7 @@ const ProductPage = () => {
   const fetchProductOwners = async () => {
     try {
       // Assuming you have an endpoint to get product owners (users)
-      const response: any = await apiService.get("/users?role=product_owner");
+      const response: any = await apiService.get("/user");
       const data = response.data || response;
       setProductOwners(Array.isArray(data) ? data : []);
     } catch (error) {

@@ -14,6 +14,7 @@ export interface IProduct extends Document {
   name: string;
   description: string;
   category: string[];
+  images_urls: string[];
   product_code: string;
   price?: number;
   product_owner_id: Types.ObjectId;
@@ -93,6 +94,10 @@ const ProductSchema: Schema<IProduct> = new Schema(
       required: true,
       uppercase: true,
       trim: true,
+    },
+    images_urls: {
+      type: [String],
+      default: [],
     },
     price: {
       type: Number,

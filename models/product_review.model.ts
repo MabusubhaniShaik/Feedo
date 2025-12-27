@@ -6,6 +6,7 @@ export interface IReviewInfo {
   response_question_text: string;
   response_question_comment?: string;
   response_rating: number;
+  image_urls?: string[];
 }
 
 export interface IProductReview extends Document {
@@ -45,6 +46,10 @@ const ReviewInfoSchema = new Schema<IReviewInfo>(
       required: true,
       min: 1,
       max: 10,
+    },
+    image_urls: {
+      type: [String],
+      default: [],
     },
   },
   {
