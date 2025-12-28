@@ -57,7 +57,15 @@ interface Question {
 }
 
 export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
-  ({ mode, initialData, loading = false, productOwners = [] }: any, ref) => {
+  (
+    {
+      mode,
+      initialData,
+      loading = false,
+      productOwners = [],
+    }: ProductFormProps,
+    ref
+  ) => {
     const [formData, setFormData] = useState({
       product_code: "",
       name: "",
@@ -292,7 +300,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                       name="product_code"
                       value={formData.product_code}
                       onChange={handleInputChange}
-                      disabled
+                      disabled={mode === "edit"} // Only disabled in edit mode, enabled in create mode
                       className="text-xs h-8"
                       placeholder="SKN-VITC-001"
                       required
