@@ -64,14 +64,12 @@ const ProductReviewSchema: Schema<IProductReview> = new Schema(
       type: Schema.Types.ObjectId,
       required: true,
       ref: "Product",
-      // REMOVE: index: true,
     },
     product_code: {
       type: String,
       required: true,
       uppercase: true,
       trim: true,
-      // REMOVE: index: true,
     },
     user_name: {
       type: String,
@@ -82,7 +80,6 @@ const ProductReviewSchema: Schema<IProductReview> = new Schema(
       type: String,
       required: true,
       trim: true,
-      // REMOVE: index: true,
     },
     email: {
       type: String,
@@ -100,14 +97,12 @@ const ProductReviewSchema: Schema<IProductReview> = new Schema(
     },
     average_rating: {
       type: Number,
-      required: true,
       min: 1,
       max: 10,
     },
     is_status: {
       type: Boolean,
       default: true,
-      // REMOVE: index: true,
     },
     created_by: {
       type: String,
