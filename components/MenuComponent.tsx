@@ -103,7 +103,7 @@ const MenuComponent = () => {
 
   return (
     <aside className="flex h-screen w-64 flex-col bg-black p-6">
-      <div className="mb-6">
+      <div className="mb-6 flex items-center justify-center">
         <h1 className="text-xl font-bold text-white">Feedo</h1>
       </div>
 
