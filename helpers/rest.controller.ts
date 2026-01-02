@@ -1,4 +1,4 @@
-// helpers/rest.controller.ts
+// helpers/rest.controller.ts - UPDATED
 import mongoose, { Model, Document } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { ResponseFormatter } from "@/helpers/response.formatter";
@@ -13,9 +13,73 @@ export class RESTController<T extends Document> {
     private searchableFields: string[] = []
   ) {}
 
-  protected async preSave(data: any, operation: string): Promise<void> {}
+  // New method to get current user from request
+  protected getCurrentUser(req: NextRequest): any {
+    const userId = req.headers.get("x-user-id");
+    const userEmail = req.headers.get("x-user-email");
+    const userRole = req.headers.get("x-user-role");
 
-  protected async postSave(data: any, operation: string): Promise<void> {}
+    if (!userId || !userEmail) {
+      return null;
+    }
+
+    return {
+      id: userId,
+      email: userEmail,
+      role: userRole || "user",
+    };
+  }
+
+  // New method to check permissions
+  protected hasPermission(user: any, requiredRole: string = "user"): boolean {
+    if (!user) return false;
+
+    const roleHierarchy = {
+      user: 1,
+      manager: 2,
+      admin: 3,
+    };
+
+    const userRoleLevel =
+      roleHierarchy[user.role as keyof typeof roleHierarchy] || 0;
+    const requiredRoleLevel =
+      roleHierarchy[requiredRole as keyof typeof roleHierarchy] || 0;
+
+    return userRoleLevel >= requiredRoleLevel;
+  }
+
+  // Override this method to add user-based filters
+  protected async applyUserFilter(
+    filter: FilterQuery<any>,
+    user: any,
+    operation: string
+  ): Promise<FilterQuery<any>> {
+    // Default: No user-specific filtering
+    return filter;
+  }
+
+  protected async preSave(
+    data: any,
+    operation: string,
+    user?: any
+  ): Promise<void> {
+    // Auto-add user info to data if user is logged in
+    if (user && operation === "CREATE") {
+      data.createdBy = user.id;
+      data.createdAt = new Date();
+    }
+
+    if (user && (operation === "UPDATE" || operation === "DELETE")) {
+      data.updatedBy = user.id;
+      data.updatedAt = new Date();
+    }
+  }
+
+  protected async postSave(
+    data: any,
+    operation: string,
+    user?: any
+  ): Promise<void> {}
 
   private buildIdQuery(id: string): FilterQuery<any> {
     if (id.match(/^[0-9a-fA-F]{24}$/)) {
@@ -40,7 +104,7 @@ export class RESTController<T extends Document> {
     // Get basic query parameters
     const page = searchParams.get("page");
     const limit = searchParams.get("limit");
-    const sort = searchParams.get("sort") || "-created_date";
+    const sort = searchParams.get("sort") || "-createdAt";
     const search = searchParams.get("search") || "";
     const idParam = searchParams.get("id");
 
@@ -95,7 +159,7 @@ export class RESTController<T extends Document> {
         const fieldName = key.replace("__regex", "");
         filter[fieldName] = { $regex: value, $options: "i" };
       } else if (key.includes(".")) {
-        // Handle nested fields (e.g., "review_info.response_question_id")
+        // Handle nested fields
         const keys = key.split(".");
         let current: any = filter;
 
@@ -108,7 +172,6 @@ export class RESTController<T extends Document> {
 
         current[keys[keys.length - 1]] = this.parseValue(value);
       } else {
-        // Direct field equality
         filter[key] = this.parseValue(value);
       }
     }
@@ -135,20 +198,16 @@ export class RESTController<T extends Document> {
   }
 
   private parseValue(value: string): any {
-    // Try to parse as number
     if (!isNaN(Number(value)) && value.trim() !== "") {
       return Number(value);
     }
 
-    // Try to parse as boolean
     if (value.toLowerCase() === "true") return true;
     if (value.toLowerCase() === "false") return false;
 
-    // Try to parse as JSON (for arrays or objects)
     try {
       return JSON.parse(value);
     } catch {
-      // Return as string
       return value;
     }
   }
@@ -182,7 +241,6 @@ export class RESTController<T extends Document> {
       options.skip = (params.pagination.page - 1) * params.pagination.limit;
     }
 
-    // Handle select/fields parameter
     if (params.originalUrl) {
       const searchParams = new URLSearchParams(params.originalUrl);
       const fields = searchParams.get("fields");
@@ -190,7 +248,6 @@ export class RESTController<T extends Document> {
         options.select = fields.split(",").join(" ");
       }
 
-      // Handle populate parameter
       const populate = searchParams.get("populate");
       if (populate) {
         options.populate = populate.split(",").map((field: string) => ({
@@ -204,14 +261,20 @@ export class RESTController<T extends Document> {
 
   async create(req: NextRequest): Promise<NextResponse> {
     try {
+      const user = this.getCurrentUser(req);
       const body = await req.json();
-      await this.preSave(body, "CREATE");
+
+      await this.preSave(body, "CREATE", user);
+
       const document = await this.model.create(body);
-      await this.postSave(document, "CREATE");
+      await this.postSave(document, "CREATE", user);
+
       const response = ResponseFormatter.success(document, "", {
         operation: "CREATE",
         collection: this.collectionName,
+        userId: user?.id,
       });
+
       return NextResponse.json(response, { status: 201 });
     } catch (error: any) {
       const response = ResponseFormatter.error(error, 400, {
@@ -224,18 +287,20 @@ export class RESTController<T extends Document> {
 
   async getById(req: NextRequest, id: string): Promise<NextResponse> {
     try {
+      const user = this.getCurrentUser(req);
       const query = this.buildIdQuery(id);
-      const { searchParams } = new URL(req.url);
 
-      // Fix: Add pagination object
+      // Apply user-specific filtering if needed
+      const userFilter = await this.applyUserFilter(query, user, "GET_BY_ID");
+
       const options = this.buildQueryOptions({
-        sort: "-created_date",
-        pagination: {}, // Add empty pagination object
+        sort: "-createdAt",
+        pagination: {},
         originalUrl: req.url,
       });
 
       const document = await this.model
-        .findOne(query)
+        .findOne(userFilter)
         .populate(options.populate || [])
         .select(options.select || {})
         .lean();
@@ -252,7 +317,9 @@ export class RESTController<T extends Document> {
       const response = ResponseFormatter.success(document, "", {
         operation: "GET_BY_ID",
         collection: this.collectionName,
+        userId: user?.id,
       });
+
       return NextResponse.json(response, { status: 200 });
     } catch (error: any) {
       const response = ResponseFormatter.error(error, 500, {
@@ -265,8 +332,16 @@ export class RESTController<T extends Document> {
 
   async getAll(req: NextRequest): Promise<NextResponse> {
     try {
+      const user = this.getCurrentUser(req);
       const { searchParams } = new URL(req.url);
       const params = this.parseQueryParams(searchParams);
+
+      // Apply user-specific filtering
+      params.filter = await this.applyUserFilter(
+        params.filter,
+        user,
+        "GET_ALL"
+      );
 
       let documents: any[];
       let total: number;
@@ -277,7 +352,6 @@ export class RESTController<T extends Document> {
         originalUrl: req.url,
       });
 
-      // Type-safe handling of pagination
       if (params.pagination.page && params.pagination.limit) {
         const page = params.pagination.page;
         const limit = params.pagination.limit;
@@ -313,23 +387,18 @@ export class RESTController<T extends Document> {
       }
 
       const operation = params.idParam ? "GET_BY_ID" : "GET_ALL";
-
-      // Fix: Create metadata object without filter property
       const metadata: any = {
         operation,
         collection: this.collectionName,
+        userId: user?.id,
+        total: total,
       };
 
-      // Add pagination if it exists
       if (pagination) {
         metadata.pagination = pagination;
       }
 
-      // Add filter if you want (but ResponseFormatter might not expect it)
-      // metadata.filter = params.filter;
-
       const response = ResponseFormatter.success(documents, "", metadata);
-
       return NextResponse.json(response, { status: 200 });
     } catch (error: any) {
       const response = ResponseFormatter.error(error, 500, {
@@ -342,12 +411,18 @@ export class RESTController<T extends Document> {
 
   async updateById(req: NextRequest, id: string): Promise<NextResponse> {
     try {
+      const user = this.getCurrentUser(req);
       const body = await req.json();
-      await this.preSave({ ...body, id }, "UPDATE");
+
+      await this.preSave({ ...body, id }, "UPDATE", user);
+
       const query = this.buildIdQuery(id);
+      // Apply user-specific filtering for update
+      const userFilter = await this.applyUserFilter(query, user, "UPDATE");
+
       const document = await this.model
         .findOneAndUpdate(
-          query,
+          userFilter,
           { $set: body },
           { new: true, runValidators: true }
         )
@@ -355,18 +430,21 @@ export class RESTController<T extends Document> {
 
       if (!document) {
         const response = ResponseFormatter.error(
-          { message: "Not found" },
+          { message: "Not found or access denied" },
           404,
           { operation: "UPDATE", collection: this.collectionName }
         );
         return NextResponse.json(response, { status: 404 });
       }
 
-      await this.postSave(document, "UPDATE");
+      await this.postSave(document, "UPDATE", user);
+
       const response = ResponseFormatter.success(document, "", {
         operation: "UPDATE",
         collection: this.collectionName,
+        userId: user?.id,
       });
+
       return NextResponse.json(response, { status: 200 });
     } catch (error: any) {
       const response = ResponseFormatter.error(error, 400, {
@@ -379,24 +457,33 @@ export class RESTController<T extends Document> {
 
   async deleteById(req: NextRequest, id: string): Promise<NextResponse> {
     try {
-      await this.preSave({ id }, "DELETE");
+      const user = this.getCurrentUser(req);
+
+      await this.preSave({ id }, "DELETE", user);
+
       const query = this.buildIdQuery(id);
-      const document = await this.model.findOneAndDelete(query).lean();
+      // Apply user-specific filtering for delete
+      const userFilter = await this.applyUserFilter(query, user, "DELETE");
+
+      const document = await this.model.findOneAndDelete(userFilter).lean();
 
       if (!document) {
         const response = ResponseFormatter.error(
-          { message: "Not found" },
+          { message: "Not found or access denied" },
           404,
           { operation: "DELETE", collection: this.collectionName }
         );
         return NextResponse.json(response, { status: 404 });
       }
 
-      await this.postSave(document, "DELETE");
+      await this.postSave(document, "DELETE", user);
+
       const response = ResponseFormatter.success(document, "", {
         operation: "DELETE",
         collection: this.collectionName,
+        userId: user?.id,
       });
+
       return NextResponse.json(response, { status: 200 });
     } catch (error: any) {
       const response = ResponseFormatter.error(error, 500, {

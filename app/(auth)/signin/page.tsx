@@ -1,3 +1,4 @@
+// app/signin/page.tsx
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff, Lock, User, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiService } from "@/helpers/api.service";
+import { api } from "@/helpers/api.service";
 import { toast } from "sonner";
 
 interface TokenResponse {
@@ -17,25 +18,17 @@ interface TokenResponse {
   expires_in: number;
 }
 
-interface DecodedToken {
-  user: {
-    _id: string;
-    user_id: string;
-    name: string;
-    email: string;
-    role_name: string;
-    role_id: string;
-    isEmailVerified: boolean;
-    is_default_password: boolean;
-    is_active: boolean;
-    created_date: string;
-  };
+interface UserInfo {
+  id: string;
   user_id: string;
+  name: string;
   email: string;
   role: string;
   role_id: string;
-  iat: number;
-  exp: number;
+  isEmailVerified: boolean;
+  is_default_password: boolean;
+  is_active: boolean;
+  created_date: string;
 }
 
 const SignInPage = () => {
@@ -46,58 +39,6 @@ const SignInPage = () => {
     user_id: "",
     password: "",
   });
-
-  const decodeToken = (token: string): DecodedToken | null => {
-    try {
-      // JWT token has 3 parts: header.payload.signature
-      const base64Url = token.split(".")[1];
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-      const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split("")
-          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-          .join("")
-      );
-      return JSON.parse(jsonPayload);
-    } catch (error) {
-      console.error("Failed to decode token:", error);
-      return null;
-    }
-  };
-
-  const storeAuthData = (tokenResponse: TokenResponse) => {
-    const decoded = decodeToken(tokenResponse.access_token);
-
-    if (!decoded) {
-      throw new Error("Failed to decode token");
-    }
-
-    // Store tokens in sessionStorage
-    sessionStorage.setItem("access_token", tokenResponse.access_token);
-    sessionStorage.setItem("refresh_token", tokenResponse.refresh_token);
-    sessionStorage.setItem("token_type", tokenResponse.token_type);
-    sessionStorage.setItem("expires_in", tokenResponse.expires_in.toString());
-
-    // Store decoded user info
-    const userInfo = {
-      id: decoded.user._id,
-      user_id: decoded.user.user_id,
-      name: decoded.user.name,
-      email: decoded.user.email,
-      role: decoded.user.role_name,
-      role_id: decoded.user.role_id,
-      isEmailVerified: decoded.user.isEmailVerified,
-      is_default_password: decoded.user.is_default_password,
-      is_active: decoded.user.is_active,
-      created_date: decoded.user.created_date,
-      token_expiry: decoded.exp,
-      token_issued: decoded.iat,
-    };
-
-    sessionStorage.setItem("user_info", JSON.stringify(userInfo));
-
-    return userInfo;
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -116,6 +57,35 @@ const SignInPage = () => {
     return true;
   };
 
+  const decodeToken = (token: string): UserInfo | null => {
+    try {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      );
+      const decoded = JSON.parse(jsonPayload);
+      return {
+        id: decoded.user._id,
+        user_id: decoded.user.user_id,
+        name: decoded.user.name,
+        email: decoded.user.email,
+        role: decoded.user.role_name,
+        role_id: decoded.user.role_id,
+        isEmailVerified: decoded.user.isEmailVerified,
+        is_default_password: decoded.user.is_default_password,
+        is_active: decoded.user.is_active,
+        created_date: decoded.user.created_date,
+      };
+    } catch (error) {
+      console.error("Failed to decode token:", error);
+      return null;
+    }
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -123,27 +93,38 @@ const SignInPage = () => {
     setIsLoading(true);
 
     try {
-      const response: TokenResponse = await apiService.post<TokenResponse>(
-        "/auth/token",
-        formData
-      );
+      // Note: No auth headers for /auth/token endpoint
+      const response = await api.post<TokenResponse>("/auth/token", formData, {}, {
+        requiresAuth: false // Important: Don't send auth headers for login
+      });
 
-      // Store auth data in sessionStorage
-      const userInfo = storeAuthData(response);
-
-      toast.success(`Welcome back, ${userInfo.name}!`);
-
-      // Redirect to manage page as specified
-      router.push("/dashboard");
+      if (response.status === "SUCCESS" && response.data[0]) {
+        const tokenData = response.data[0];
+        
+        // Decode token to get user info
+        const userInfo = decodeToken(tokenData.access_token);
+        
+        if (userInfo) {
+          // Store in session storage
+          sessionStorage.setItem("access_token", tokenData.access_token);
+          sessionStorage.setItem("refresh_token", tokenData.refresh_token);
+          sessionStorage.setItem("token_type", tokenData.token_type);
+          sessionStorage.setItem("expires_in", tokenData.expires_in.toString());
+          sessionStorage.setItem("user_info", JSON.stringify(userInfo));
+          
+          toast.success(`Welcome back, ${userInfo.name}!`);
+          router.push("/dashboard");
+        } else {
+          throw new Error("Failed to decode user information");
+        }
+      } else {
+        throw new Error(response.error || "Login failed");
+      }
     } catch (err: any) {
       toast.error(err.message || "Invalid credentials");
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleGoogleSignIn = () => {
-    window.location.href = "/api/auth/google";
   };
 
   const displayData = `Signing in as: ${formData.user_id || "..."}`;
@@ -204,21 +185,10 @@ const SignInPage = () => {
             </div>
           </div>
 
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={() => router.push("/password-reset")}
-              disabled={isLoading}
-              className="text-sm text-black hover:underline disabled:opacity-50"
-            >
-              Forgot password?
-            </button>
-          </div>
-
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-black hover:bg-black/90 disabled:bg-gray-700"
+            className="w-full bg-black hover:bg-black/90"
           >
             {isLoading ? (
               <>
@@ -231,30 +201,12 @@ const SignInPage = () => {
           </Button>
         </form>
 
-        <div className="relative">
-          <Separator className="my-4" />
-          <div className="absolute left-1/2 top-1/2 px-3 text-sm text-gray-500 bg-white -translate-x-1/2 -translate-y-1/2">
-            Or continue with
-          </div>
-        </div>
-
-        <Button
-          variant="outline"
-          onClick={handleGoogleSignIn}
-          disabled={isLoading}
-          className="w-full"
-        >
-          <GoogleIcon className="w-4 h-4 mr-2" />
-          Continue with Google
-        </Button>
-
-        <div className="text-center text-sm text-gray-600 pt-2">
+        <div className="text-center text-sm text-gray-600">
           Don&apos;t have an account?{" "}
           <button
             type="button"
             onClick={() => router.push("/signup")}
-            disabled={isLoading}
-            className="font-medium text-black hover:underline disabled:opacity-50"
+            className="font-medium text-black hover:underline"
           >
             Sign up
           </button>
@@ -263,28 +215,5 @@ const SignInPage = () => {
     </Card>
   );
 };
-
-const GoogleIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24">
-    <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
-      <path
-        fill="#4285F4"
-        d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"
-      />
-      <path
-        fill="#34A853"
-        d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z"
-      />
-      <path
-        fill="#EA4335"
-        d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z"
-      />
-    </g>
-  </svg>
-);
 
 export default SignInPage;
