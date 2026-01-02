@@ -7,30 +7,48 @@ import { menuItems } from "@/config/menu.config";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { apiService } from "@/helpers/api.service";
+import { useEffect, useState } from "react";
 
 const MenuComponent = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
-  // Filter out settings from main menu
-  const mainMenuItems = menuItems.filter((item) => item.label !== "Settings");
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
-  // Helper to check if a path is active (including nested routes)
+  useEffect(() => {
+    if (isClient) {
+      const userInfo = sessionStorage.getItem("user_info");
+      if (userInfo) {
+        try {
+          const parsed = JSON.parse(userInfo);
+          setUserRole(parsed.role || null);
+        } catch {
+          setUserRole(null);
+        }
+      }
+    }
+  }, [isClient]);
+
+  const filteredMenuItems = menuItems.filter((item) => {
+    if (!isClient) return true;
+    if (!item.roles || !userRole) return true;
+    return item.roles.includes(userRole);
+  });
+
+  const mainMenuItems = filteredMenuItems.filter(
+    (item) => item.label !== "Settings"
+  );
+
   const isPathActive = (href: string) => {
-    // Exact match
     if (pathname === href) return true;
-
-    // For dynamic routes, check if pathname starts with the base path
-    // Example: /product/123 should highlight /product menu
     if (href !== "/" && pathname.startsWith(href + "/")) return true;
-
-    // Special case for root
-    if (href === "/" && pathname === "/") return true;
-
     return false;
   };
 
-  // Class generators
   const getLinkClasses = (active: boolean) =>
     `group relative flex items-center w-full rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 ${
       active
@@ -43,25 +61,19 @@ const MenuComponent = () => {
       active ? "text-white" : "text-gray-400 group-hover:text-white"
     }`;
 
-  const getBadgeClasses = (active: boolean) =>
-    `rounded-full px-2 py-0.5 text-xs ${
-      active ? "bg-white/20" : "bg-gray-800"
-    }`;
-
-  // Logout handler
   const handleLogout = async () => {
     try {
-      const token = sessionStorage.getItem("access_token");
+      const access_token = sessionStorage.getItem("access_token");
       const userInfo = sessionStorage.getItem("user_info");
 
-      if (token && userInfo) {
+      if (access_token && userInfo) {
         const userData = JSON.parse(userInfo);
-        await apiService.post(
-          "/auth/revoke",
-          { access_token: token, user_id: userData.id },
-          undefined,
-          { Authorization: `Bearer ${token}` }
-        );
+        const payload = {
+          access_token,
+          user_id: userData.id,
+        };
+
+        await apiService.post("/auth/revoke", payload);
       }
     } catch (error) {
       console.error("Logout error:", error);
@@ -71,18 +83,33 @@ const MenuComponent = () => {
     }
   };
 
+  if (!isClient) {
+    return (
+      <aside className="flex h-screen w-64 flex-col bg-black p-6">
+        <div className="mb-6">
+          <h1 className="text-xl font-bold text-white">Feedo</h1>
+        </div>
+        <div className="flex-1 space-y-1">
+          {[...Array(5)].map((_, i) => (
+            <div
+              key={i}
+              className="h-10 bg-gray-900 rounded-md animate-pulse"
+            />
+          ))}
+        </div>
+      </aside>
+    );
+  }
+
   return (
     <aside className="flex h-screen w-64 flex-col bg-black p-6">
-      {/* Logo */}
       <div className="mb-6">
         <h1 className="text-xl font-bold text-white">Feedo</h1>
       </div>
 
-      {/* Main Navigation */}
       <nav className="flex-1 space-y-1 overflow-y-auto">
         {mainMenuItems.map((item) => {
           const isActive = isPathActive(item.href);
-
           return (
             <Link
               key={item.href}
@@ -90,43 +117,32 @@ const MenuComponent = () => {
               className={getLinkClasses(isActive)}
               aria-current={isActive ? "page" : undefined}
             >
-              {/* Active Indicator */}
               {isActive && (
                 <div className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-r-full bg-white" />
               )}
-
-              {/* Icon */}
               {item.icon && <item.icon className={getIconClasses(isActive)} />}
-
-              {/* Label */}
               <span className="flex-1">{item.label}</span>
-
-              {/* Badge */}
-              {item.count !== undefined && (
-                <span className={getBadgeClasses(isActive)}>{item.count}</span>
-              )}
             </Link>
           );
         })}
       </nav>
 
-      {/* Footer Section */}
       <div className="mt-auto space-y-2 pt-6">
         <Separator className="bg-gray-800" />
 
-        {/* Settings */}
-        <Link
-          href="/settings"
-          className={getLinkClasses(pathname === "/settings")}
-        >
-          {pathname === "/settings" && (
-            <div className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-r-full bg-white" />
-          )}
-          <Settings className={getIconClasses(pathname === "/settings")} />
-          <span className="flex-1">Settings</span>
-        </Link>
+        {filteredMenuItems.some((item) => item.label === "Settings") && (
+          <Link
+            href="/settings"
+            className={getLinkClasses(pathname === "/settings")}
+          >
+            {pathname === "/settings" && (
+              <div className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-r-full bg-white" />
+            )}
+            <Settings className={getIconClasses(pathname === "/settings")} />
+            <span className="flex-1">Settings</span>
+          </Link>
+        )}
 
-        {/* Logout */}
         <Button
           variant="ghost"
           className="w-full justify-start px-3 py-2 text-gray-300 hover:bg-gray-900 hover:text-white"

@@ -144,7 +144,8 @@ export default function ProductDetailPage() {
 
   const handleViewFeedback = () => {
     if (!id) return;
-    router.push(`/feedback/${id}`);
+    // router.push(`/feedback/${id}`);
+    window.open(`/feedback/${id}`, "_blank");
   };
 
   // Loading state

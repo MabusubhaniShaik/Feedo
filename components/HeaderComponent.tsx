@@ -19,11 +19,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useRouter } from "next/navigation";
+import { apiService } from "@/helpers/api.service";
 
 interface UserInfo {
   name: string;
   role: string;
   email?: string;
+  id?: string;
 }
 
 interface Notification {
@@ -73,6 +75,7 @@ const HeaderComponent = () => {
           email:
             userInfo.email ||
             `${(userInfo.name || "user").toLowerCase()}@example.com`,
+          id: userInfo.id,
         });
       }
     } catch {
@@ -104,9 +107,26 @@ const HeaderComponent = () => {
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))
     );
 
-  const handleLogout = () => {
-    sessionStorage.clear();
-    router.push("/signin");
+  const handleLogout = async () => {
+    try {
+      const access_token = sessionStorage.getItem("access_token");
+      const userInfo = sessionStorage.getItem("user_info");
+
+      if (access_token && userInfo) {
+        const userData = JSON.parse(userInfo);
+        const payload = {
+          access_token,
+          user_id: userData.id,
+        };
+
+        await apiService.post("/auth/revoke", payload);
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      sessionStorage.clear();
+      router.push("/signin");
+    }
   };
 
   if (!user)

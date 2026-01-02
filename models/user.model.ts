@@ -86,12 +86,6 @@ const UserSchema: Schema<IUser> = new Schema(
   }
 );
 
-// REMOVE THESE INDEX CALLS - they're creating duplicates
-// UserSchema.index({ email: 1 });
-// UserSchema.index({ user_id: 1 });
-// UserSchema.index({ role_id: 1 });
-// UserSchema.index({ is_active: 1 });
-
 // Auto-update updated_date on modifications
 UserSchema.pre("findOneAndUpdate", function () {
   this.set({ updated_date: new Date() });

@@ -9,11 +9,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,25 +52,68 @@ interface Product {
   updated_by: string;
 }
 
+interface PaginationData {
+  current_page: number;
+  page_count: number;
+  total_record_count: number;
+  limit: number;
+}
+
 const ProductPage = () => {
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [pagination, setPagination] = useState<PaginationData>({
+    current_page: 1,
+    page_count: 1,
+    total_record_count: 0,
+    limit: 10,
+  });
 
-  // Delete dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [page, limit]);
+
+  const getUserIdFromSession = (): string | null => {
+    if (typeof window === "undefined") return null;
+    const userInfo = sessionStorage.getItem("user_info");
+    if (!userInfo) return null;
+    try {
+      const parsed = JSON.parse(userInfo);
+      return parsed?.id || null;
+    } catch {
+      return null;
+    }
+  };
 
   const fetchProducts = async () => {
     try {
-      const response: any = await apiService.get("/product");
+      setLoading(true);
+      const productOwnerId = getUserIdFromSession();
+      if (!productOwnerId) throw new Error("User not found");
+
+      const response: any = await apiService.get("/product", {
+        product_owner_id: productOwnerId,
+        page,
+        limit,
+      });
+
       const data = response.data || response;
+      const paginationData = response.pagination || {
+        current_page: page,
+        page_count: 1,
+        total_record_count: Array.isArray(data) ? data.length : 0,
+        limit,
+      };
+
       setProducts(Array.isArray(data) ? data : []);
+      setPagination(paginationData);
     } catch (error) {
       console.error("Error fetching products:", error);
     } finally {
@@ -97,10 +142,12 @@ const ProductPage = () => {
       setIsDeleting(true);
       await apiService.delete(`/product/${productToDelete._id}`);
 
-      // Remove product from local state
       setProducts((prev) => prev.filter((p) => p._id !== productToDelete._id));
+      setPagination((prev) => ({
+        ...prev,
+        total_record_count: prev.total_record_count - 1,
+      }));
 
-      // Close dialog
       setDeleteDialogOpen(false);
       setProductToDelete(null);
     } catch (error) {
@@ -116,7 +163,15 @@ const ProductPage = () => {
     setProductToDelete(null);
   };
 
-  // Helper function to truncate text with ellipsis
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleLimitChange = (newLimit: string) => {
+    setLimit(parseInt(newLimit));
+    setPage(1);
+  };
+
   const truncateText = (text: string, maxLength: number = 15) => {
     if (!text) return "-";
     return text.length > maxLength
@@ -124,12 +179,38 @@ const ProductPage = () => {
       : text;
   };
 
-  // Helper function to check if text needs truncation
-  const needsTruncation = (text: string, maxLength: number = 15) => {
-    return text && text.length > maxLength;
+  // Generate page numbers
+  const generatePageNumbers = () => {
+    const { page_count } = pagination;
+    const pages = [];
+    const maxVisiblePages = 5;
+
+    if (page_count <= maxVisiblePages) {
+      for (let i = 1; i <= page_count; i++) pages.push(i);
+    } else {
+      let startPage = Math.max(1, page - Math.floor(maxVisiblePages / 2));
+      let endPage = Math.min(page_count, startPage + maxVisiblePages - 1);
+
+      if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+      }
+
+      if (startPage > 1) {
+        pages.push(1);
+        if (startPage > 2) pages.push("...");
+      }
+
+      for (let i = startPage; i <= endPage; i++) pages.push(i);
+
+      if (endPage < page_count) {
+        if (endPage < page_count - 1) pages.push("...");
+        pages.push(page_count);
+      }
+    }
+
+    return pages;
   };
 
-  // Columns definition
   const columns = [
     {
       key: "product_code" as keyof Product,
@@ -140,69 +221,23 @@ const ProductPage = () => {
       key: "name" as keyof Product,
       header: "Name",
       className: "text-[0.75rem]",
-      cell: (product: Product) => {
-        const truncatedName = truncateText(product.name, 15);
-        const showTooltip = needsTruncation(product.name, 15);
-
-        if (showTooltip) {
-          return (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="cursor-default">{truncatedName}</span>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  <p className="text-[0.75rem]">{product.name}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          );
-        }
-
-        return <span>{truncatedName}</span>;
-      },
+      cell: (product: Product) => truncateText(product.name, 15),
     },
     {
       key: "description" as keyof Product,
       header: "Description",
       className: "text-[0.75rem]",
-      cell: (product: Product) => {
-        const truncatedDesc = truncateText(product.description, 25);
-        const showTooltip = needsTruncation(product.description, 25);
-
-        if (showTooltip) {
-          return (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="max-w-[12.5rem] truncate text-[0.75rem] cursor-default">
-                    {truncatedDesc || "-"}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  <p className="text-[0.75rem]">{product.description || "-"}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          );
-        }
-
-        return (
-          <div className="max-w-[12.5rem] text-[0.75rem]">
-            {product.description || "-"}
-          </div>
-        );
-      },
+      cell: (product: Product) => (
+        <div className="max-w-[12.5rem] truncate text-[0.75rem]">
+          {truncateText(product.description, 25) || "-"}
+        </div>
+      ),
     },
     {
       key: "price" as keyof Product,
       header: "Price",
       className: "text-[0.75rem]",
-      cell: (product: Product) => (
-        <span className="text-[0.75rem]">
-          ${product.price?.toFixed(2) || "0.00"}
-        </span>
-      ),
+      cell: (product: Product) => `$${product.price?.toFixed(2) || "0.00"}`,
     },
     {
       key: "category" as keyof Product,
@@ -216,30 +251,9 @@ const ProductPage = () => {
             </Badge>
           ))}
           {product.category.length > 2 && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge
-                    variant="outline"
-                    className="text-[0.625rem] cursor-default"
-                  >
-                    +{product.category.length - 2}
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <div className="space-y-1">
-                    <p className="text-[0.75rem] font-medium">
-                      All Categories:
-                    </p>
-                    {product.category.map((cat, idx) => (
-                      <p key={idx} className="text-[0.75rem]">
-                        • {cat}
-                      </p>
-                    ))}
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Badge variant="outline" className="text-[0.625rem]">
+              +{product.category.length - 2}
+            </Badge>
           )}
         </div>
       ),
@@ -278,48 +292,93 @@ const ProductPage = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <Card className="text-[0.75rem] gap-0 p-0">
-        <CardHeader className="p-4 pb-2">
+      <Card className="text-[0.75rem]">
+        <CardHeader className="pb-2">
           <div className="flex justify-between items-center">
-            <CardTitle className="text-[0.875rem]">
-              Product Management
-            </CardTitle>
+            <CardTitle className="text-[0.875rem]">Products</CardTitle>
             <div className="flex gap-1">
               <Button
                 onClick={handleCreate}
                 size="sm"
-                className="text-[0.625rem] h-6 px-2 gap-1"
+                className="text-[0.75rem] h-6 px-2 rounded-[3px]"
               >
-                <PackagePlus className="h-2.5 w-2.5" />
-                Add Product
+                <PackagePlus className="h-3 w-3 mr-1" />
+                Add
               </Button>
               <Button
                 onClick={fetchProducts}
                 variant="outline"
                 size="sm"
-                className="text-[0.625rem] h-6 px-2 gap-1"
+                className="text-[0.75rem] h-6 px-2 rounded-[3px]"
               >
-                <RefreshCw className="h-2.5 w-2.5" />
+                <RefreshCw className="h-3 w-3 mr-1" />
                 Refresh
               </Button>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="p-4 pt-2">
-          <TooltipProvider>
-            <DataTable
-              data={products}
-              columns={columns}
-              loading={loading}
-              emptyMessage="No products found"
-              onRowClick={handleRowClick}
-              className="[&_tr]:cursor-pointer [&_tr:hover]:bg-muted/50"
-            />
-          </TooltipProvider>
+        <CardContent>
+          <DataTable
+            data={products}
+            columns={columns}
+            loading={loading}
+            emptyMessage="No products found"
+            onRowClick={handleRowClick}
+            className="[&_tr]:cursor-pointer [&_tr:hover]:bg-muted/50"
+          />
+
+          {/* Pagination */}
+          <div className="mt-4 w-full flex justify-end">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => handlePageChange(Math.max(1, page - 1))}
+                    className={`text-[0.75rem] ${
+                      page === 1 ? "pointer-events-none opacity-50" : ""
+                    }`}
+                  />
+                </PaginationItem>
+
+                {generatePageNumbers().map((pageNum, index) =>
+                  pageNum === "..." ? (
+                    <PaginationItem key={`ellipsis-${index}`}>
+                      <span className="px-1 text-[0.75rem]">...</span>
+                    </PaginationItem>
+                  ) : (
+                    <PaginationItem key={pageNum}>
+                      <PaginationLink
+                        onClick={() => handlePageChange(pageNum as number)}
+                        isActive={page === pageNum}
+                        className="text-[0.75rem]"
+                      >
+                        {pageNum}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )
+                )}
+
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() =>
+                      handlePageChange(
+                        Math.min(pagination.page_count, page + 1)
+                      )
+                    }
+                    className={`text-[0.75rem] ${
+                      page === pagination.page_count
+                        ? "pointer-events-none opacity-50"
+                        : ""
+                    }`}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="text-[0.75rem] max-w-md">
           <AlertDialogHeader>
@@ -327,9 +386,9 @@ const ProductPage = () => {
               Delete Product
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete{" "}
+              Delete{" "}
               <span className="font-medium">{productToDelete?.name}</span>? This
-              action cannot be undone.
+              cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -180,7 +180,7 @@ const ManagePage = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6"
+            className="text-[0.75rem] h-6 px-2 rounded-[3px]"
             onClick={(e) => {
               e.stopPropagation();
               handleEdit(user);
@@ -214,18 +214,18 @@ const ManagePage = () => {
               <Button
                 onClick={handleCreate}
                 size="sm"
-                className="text-[0.75rem] h-8"
+                className="text-[0.75rem] h-6 px-2 rounded-[3px]"
               >
-                <UserPlus className="h-3 w-3 mr-1" />
+                <UserPlus className="h-2 w-2 mr-1" />
                 Add User
               </Button>
               <Button
                 onClick={fetchUsers}
                 variant="outline"
                 size="sm"
-                className="text-[0.75rem] h-8"
+                className="text-[0.75rem] h-6 px-2 rounded-[3px]"
               >
-                <RefreshCw className="h-3 w-3 mr-1" />
+                <RefreshCw className="h-2 w-2 mr-1" />
                 Refresh
               </Button>
             </div>

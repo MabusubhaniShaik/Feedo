@@ -1,4 +1,4 @@
-// models/product_review.model.ts - FIXED
+// models/product_review.model.ts - UPDATED (without pre-save)
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
 
 export interface IReviewInfo {
@@ -12,7 +12,8 @@ export interface IReviewInfo {
 export interface IProductReview extends Document {
   product_id: Types.ObjectId;
   product_code: string;
-  user_name?: string;
+  product_owner_id?: Types.ObjectId;
+  product_owner_name: string;
   mobile_number: string;
   email?: string;
   review_info: IReviewInfo[];
@@ -71,8 +72,14 @@ const ProductReviewSchema: Schema<IProductReview> = new Schema(
       uppercase: true,
       trim: true,
     },
-    user_name: {
+    product_owner_id: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      index: true,
+    },
+    product_owner_name: {
       type: String,
+      required: true,
       trim: true,
       maxlength: 100,
     },
@@ -99,6 +106,7 @@ const ProductReviewSchema: Schema<IProductReview> = new Schema(
       type: Number,
       min: 1,
       max: 10,
+      default: 1,
     },
     is_status: {
       type: Boolean,
@@ -127,15 +135,6 @@ const ProductReviewSchema: Schema<IProductReview> = new Schema(
     timestamps: false,
   }
 );
-
-// KEEP THESE indexes but remove index: true from field definitions
-ProductReviewSchema.index({ product_id: 1, created_date: -1 });
-ProductReviewSchema.index({ product_code: 1, is_status: 1 });
-ProductReviewSchema.index({ mobile_number: 1, product_id: 1 });
-ProductReviewSchema.index({ mobile_number: 1, product_code: 1 });
-ProductReviewSchema.index({ average_rating: 1 });
-ProductReviewSchema.index({ created_date: -1 });
-ProductReviewSchema.index({ is_status: 1 });
 
 const ProductReview: Model<IProductReview> =
   mongoose.models.ProductReview ||

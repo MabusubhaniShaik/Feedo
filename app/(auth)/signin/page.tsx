@@ -134,7 +134,7 @@ const SignInPage = () => {
       toast.success(`Welcome back, ${userInfo.name}!`);
 
       // Redirect to manage page as specified
-      router.push("/manage");
+      router.push("/dashboard");
     } catch (err: any) {
       toast.error(err.message || "Invalid credentials");
     } finally {

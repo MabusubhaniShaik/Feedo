@@ -1,26 +1,25 @@
 // app/(dashboard)/layout.tsx
 import HeaderComponent from "@/components/HeaderComponent";
 import MenuComponent from "@/components/MenuComponent";
+import AuthGuard from "@/components/AuthGuard";
 
-interface MainLayoutProps {
+export default function MainLayout({
+  children,
+}: {
   children: React.ReactNode;
-}
-
-const MainLayout = ({ children }: MainLayoutProps) => {
+}) {
   return (
-    <div className="flex h-screen">
-      {/* Sidebar */}
-      <div className="hidden md:block w-64 flex-shrink-0">
-        <MenuComponent />
-      </div>
+    <AuthGuard mode="protected">
+      <div className="flex h-screen">
+        <div className="hidden md:block w-64">
+          <MenuComponent />
+        </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        <HeaderComponent />
-        <main className="flex-1 overflow-auto p-2">{children}</main>
+        <div className="flex-1 flex flex-col">
+          <HeaderComponent />
+          <main className="flex-1 overflow-auto p-2">{children}</main>
+        </div>
       </div>
-    </div>
+    </AuthGuard>
   );
-};
-
-export default MainLayout;
+}
