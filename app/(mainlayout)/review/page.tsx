@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { apiService } from "@/helpers/api.service";
 import {
   Accordion,
@@ -32,6 +32,7 @@ import {
   CheckCircle,
   MessageSquare,
   Download,
+  RefreshCw,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -73,14 +74,21 @@ interface ApiResponse {
 }
 
 interface ReviewFilters {
-  page?: number;
-  limit?: number;
-  sortBy?: "newest" | "highest" | "lowest";
+  page: number;
+  limit: number;
+  sortBy: "newest" | "highest" | "lowest";
 }
+
+const DEFAULT_FILTERS: ReviewFilters = {
+  page: 1,
+  limit: 10,
+  sortBy: "newest",
+};
 
 const ReviewPage = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState({
     current_page: 1,
@@ -88,17 +96,9 @@ const ReviewPage = () => {
     total_record_count: 0,
     limit: 10,
   });
-  const [filters, setFilters] = useState<ReviewFilters>({
-    page: 1,
-    limit: 10,
-    sortBy: "newest",
-  });
+  const [filters, setFilters] = useState<ReviewFilters>(DEFAULT_FILTERS);
 
-  useEffect(() => {
-    fetchReviews();
-  }, [filters.sortBy, filters.page, filters.limit]);
-
-  const getProductOwnerId = (): string | null => {
+  const getProductOwnerId = useCallback((): string | null => {
     if (typeof window === "undefined") return null;
     const userInfo = sessionStorage.getItem("user_info");
     if (!userInfo) return null;
@@ -108,52 +108,74 @@ const ReviewPage = () => {
     } catch {
       return null;
     }
-  };
+  }, []);
 
-  const fetchReviews = async () => {
-    try {
-      setLoading(true);
+  const sortMapping = useMemo(
+    () => ({
+      newest: "-created_date",
+      highest: "-average_rating",
+      lowest: "average_rating",
+    }),
+    []
+  );
+
+  const fetchReviews = useCallback(
+    async (isRefresh = false) => {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
       setError(null);
 
-      const productOwnerId = getProductOwnerId();
-      if (!productOwnerId) throw new Error("Product owner not found");
+      try {
+        const productOwnerId = getProductOwnerId();
+        if (!productOwnerId) {
+          throw new Error("Product owner not found");
+        }
 
-      const params = {
-        page: filters.page,
-        limit: filters.limit,
-        product_owner_id: productOwnerId,
-        sort:
-          filters.sortBy === "newest"
-            ? "-created_date"
-            : filters.sortBy === "highest"
-            ? "-average_rating"
-            : "average_rating",
-      };
+        const params = {
+          page: filters.page,
+          limit: filters.limit,
+          product_owner_id: productOwnerId,
+          sort: sortMapping[filters.sortBy],
+        };
 
-      const response = await apiService.get<ApiResponse>(
-        "/product-review",
-        params
-      );
-
-      if (response.status === "SUCCESS") {
-        setReviews(response.data);
-        setPagination(
-          response.pagination ?? {
-            current_page: filters.page,
-            page_count: 1,
-            total_record_count: response.data.length,
-            limit: filters.limit,
-          }
+        const response = await apiService.get<ApiResponse>(
+          "/product-review",
+          params
         );
-      } else {
-        throw new Error(response.message || "Failed to fetch reviews");
+
+        if (response.status === "SUCCESS") {
+          setReviews(response.data);
+          setPagination(
+            response.pagination ?? {
+              current_page: filters.page,
+              page_count: 1,
+              total_record_count: response.data.length,
+              limit: filters.limit,
+            }
+          );
+        } else {
+          throw new Error(response.message || "Failed to fetch reviews");
+        }
+      } catch (err) {
+        console.error("API Error:", err);
+        setError(err instanceof Error ? err.message : "Failed to load reviews");
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
       }
-    } catch (err) {
-      console.error("API Error:", err);
-      setError(err instanceof Error ? err.message : "Failed to load reviews");
-    } finally {
-      setLoading(false);
-    }
+    },
+    [filters, getProductOwnerId, sortMapping]
+  );
+
+  useEffect(() => {
+    fetchReviews();
+  }, [fetchReviews]);
+
+  const handleRefresh = () => {
+    fetchReviews(true);
   };
 
   const handleSortChange = (value: string) => {
@@ -162,10 +184,6 @@ const ReviewPage = () => {
       sortBy: value as ReviewFilters["sortBy"],
       page: 1,
     }));
-  };
-
-  const handleLimitChange = (value: string) => {
-    setFilters((prev) => ({ ...prev, limit: parseInt(value), page: 1 }));
   };
 
   const handlePageChange = (page: number) => {
@@ -207,7 +225,7 @@ const ReviewPage = () => {
     return [headers, ...rows].map((row) => row.join(",")).join("\n");
   };
 
-  const renderStars = (rating: number) => {
+  const renderStars = useCallback((rating: number) => {
     return (
       <div className="flex">
         {[...Array(5)].map((_, i) => (
@@ -222,34 +240,71 @@ const ReviewPage = () => {
         ))}
       </div>
     );
-  };
+  }, []);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = useCallback((dateString: string) => {
     return new Intl.DateTimeFormat("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
     }).format(new Date(dateString));
-  };
+  }, []);
 
-  const overallStats =
-    reviews.length > 0
-      ? {
-          averageRating:
-            reviews.reduce((acc, review) => acc + review.average_rating, 0) /
-            reviews.length,
-          totalQuestions: reviews.reduce(
-            (acc, review) => acc + review.review_info.length,
-            0
-          ),
-        }
-      : null;
+  const overallStats = useMemo(() => {
+    if (reviews.length === 0) return null;
+
+    return {
+      averageRating: Number(
+        (
+          reviews.reduce((acc, review) => acc + review.average_rating, 0) /
+          reviews.length
+        ).toFixed(1)
+      ),
+      totalQuestions: reviews.reduce(
+        (acc, review) => acc + review.review_info.length,
+        0
+      ),
+    };
+  }, [reviews]);
+
+  const paginationItems = useMemo(() => {
+    if (pagination.page_count <= 1) return null;
+
+    const items = [];
+    const maxVisible = 5;
+
+    if (pagination.page_count <= maxVisible) {
+      for (let i = 1; i <= pagination.page_count; i++) {
+        items.push(i);
+      }
+    } else {
+      let start = Math.max(1, pagination.current_page - 2);
+      let end = Math.min(pagination.page_count, start + maxVisible - 1);
+
+      if (end - start + 1 < maxVisible) {
+        start = Math.max(1, end - maxVisible + 1);
+      }
+
+      for (let i = start; i <= end; i++) {
+        items.push(i);
+      }
+    }
+
+    return items;
+  }, [pagination.page_count, pagination.current_page]);
 
   if (error) {
     return (
       <div className="container mx-auto py-6 px-4">
         <Alert variant="destructive" className="text-[10px]">
           <AlertDescription className="text-[10px]">{error}</AlertDescription>
+          <Button
+            onClick={handleRefresh}
+            size="sm"
+            className="mt-2 text-[10px]"
+          >
+            Retry
+          </Button>
         </Alert>
       </div>
     );
@@ -294,7 +349,11 @@ const ReviewPage = () => {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Select value={filters.sortBy} onValueChange={handleSortChange}>
+            <Select
+              value={filters.sortBy}
+              onValueChange={handleSortChange}
+              disabled={loading || refreshing}
+            >
               <SelectTrigger className="w-[120px] h-6 text-[10px]">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
@@ -313,17 +372,32 @@ const ReviewPage = () => {
 
             <Button
               variant="outline"
+              onClick={handleRefresh}
+              size="sm"
+              className="h-6 px-2 text-[10px] gap-1 rounded-[3px]"
+              disabled={loading || refreshing}
+            >
+              <RefreshCw
+                className={`w-[5px] h-[5px] ${
+                  refreshing ? "animate-spin" : ""
+                }`}
+              />
+              Refresh
+            </Button>
+
+            <Button
+              variant="outline"
               onClick={handleExport}
               size="sm"
               className="h-6 px-2 text-[10px] gap-1 rounded-[3px]"
-              disabled
+              disabled={loading || refreshing || reviews.length === 0}
             >
               <Download className="w-[5px] h-[5px]" />
               Export
             </Button>
           </div>
 
-          {!loading && (
+          {!loading && !refreshing && (
             <span className="text-[10px] text-muted-foreground">
               {pagination.total_record_count} record
               {pagination.total_record_count !== 1 ? "s" : ""}
@@ -332,9 +406,8 @@ const ReviewPage = () => {
         </div>
       </div>
 
-      {/* Reviews Accordion */}
       <div className="space-y-2">
-        {loading ? (
+        {loading && !refreshing ? (
           Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="border rounded-md p-3">
               <Skeleton className="h-4 w-1/3 mb-2" />
@@ -348,6 +421,15 @@ const ReviewPage = () => {
             <p className="text-[10px] text-muted-foreground mt-1">
               Be the first to review this product
             </p>
+            <Button
+              onClick={handleRefresh}
+              variant="outline"
+              size="sm"
+              className="mt-3 text-[10px]"
+            >
+              <RefreshCw className="w-3 h-3 mr-1" />
+              Refresh
+            </Button>
           </div>
         ) : (
           <Accordion type="single" collapsible className="space-y-2">
@@ -428,43 +510,8 @@ const ReviewPage = () => {
         )}
       </div>
 
-      {/* Pagination */}
       {pagination.page_count > 1 && !loading && reviews.length > 0 && (
         <div className="mt-6 flex items-center justify-between">
-          {/* <div className="flex items-center gap-2">
-            <Select
-              value={filters.limit.toString()}
-              onValueChange={handleLimitChange}
-            >
-              <SelectTrigger className="w-[60px] h-6 text-[10px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="text-[10px]">
-                <SelectItem value="5" className="text-[10px]">
-                  5
-                </SelectItem>
-                <SelectItem value="10" className="text-[10px]">
-                  10
-                </SelectItem>
-                <SelectItem value="20" className="text-[10px]">
-                  20
-                </SelectItem>
-                <SelectItem value="50" className="text-[10px]">
-                  50
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="text-[10px] text-muted-foreground">
-            {(pagination.current_page - 1) * pagination.limit + 1}-
-            {Math.min(
-              pagination.current_page * pagination.limit,
-              pagination.total_record_count
-            )}{" "}
-            of {pagination.total_record_count}
-          </div> */}
-
           <Pagination>
             <PaginationContent>
               <PaginationItem>
@@ -480,36 +527,17 @@ const ReviewPage = () => {
                 />
               </PaginationItem>
 
-              {Array.from(
-                { length: Math.min(5, pagination.page_count) },
-                (_, i) => {
-                  let pageNum;
-                  if (pagination.page_count <= 5) {
-                    pageNum = i + 1;
-                  } else if (pagination.current_page <= 3) {
-                    pageNum = i + 1;
-                  } else if (
-                    pagination.current_page >=
-                    pagination.page_count - 2
-                  ) {
-                    pageNum = pagination.page_count - 4 + i;
-                  } else {
-                    pageNum = pagination.current_page - 2 + i;
-                  }
-
-                  return (
-                    <PaginationItem key={pageNum}>
-                      <PaginationLink
-                        onClick={() => handlePageChange(pageNum)}
-                        isActive={pagination.current_page === pageNum}
-                        className="text-[10px]"
-                      >
-                        {pageNum}
-                      </PaginationLink>
-                    </PaginationItem>
-                  );
-                }
-              )}
+              {paginationItems?.map((pageNum) => (
+                <PaginationItem key={pageNum}>
+                  <PaginationLink
+                    onClick={() => handlePageChange(pageNum)}
+                    isActive={pagination.current_page === pageNum}
+                    className="text-[10px]"
+                  >
+                    {pageNum}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
 
               <PaginationItem>
                 <PaginationNext
@@ -532,32 +560,6 @@ const ReviewPage = () => {
           </Pagination>
         </div>
       )}
-
-      {/* Pagination Info
-      {!loading && reviews.length > 0 && (
-        <div className="mt-4 grid grid-cols-4 gap-2 text-[10px]">
-          <div className="bg-muted p-2 rounded text-center">
-            <div className="font-semibold">Page</div>
-            <div className="text-[12px] font-bold">
-              {pagination.current_page}
-            </div>
-          </div>
-          <div className="bg-muted p-2 rounded text-center">
-            <div className="font-semibold">Total Pages</div>
-            <div className="text-[12px] font-bold">{pagination.page_count}</div>
-          </div>
-          <div className="bg-muted p-2 rounded text-center">
-            <div className="font-semibold">Total Items</div>
-            <div className="text-[12px] font-bold">
-              {pagination.total_record_count}
-            </div>
-          </div>
-          <div className="bg-muted p-2 rounded text-center">
-            <div className="font-semibold">Page Size</div>
-            <div className="text-[12px] font-bold">{pagination.limit}</div>
-          </div>
-        </div>
-      )} */}
     </div>
   );
 };

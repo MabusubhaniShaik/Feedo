@@ -11,6 +11,7 @@ import React, {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -23,6 +24,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { QRCodeSVG } from "qrcode.react";
 import {
   X,
   Plus,
@@ -273,6 +275,105 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
 
     const isViewMode = mode === "view";
     const isDisabled = isViewMode || loading;
+
+    // Helper functions section
+    const formatFileName = (productName: string, productId: string): string => {
+      const cleanName = productName
+        .replace(/[^a-zA-Z0-9]/g, "_")
+        .toLowerCase()
+        .substring(0, 20);
+      return `feedback_qr_${cleanName}_${productId.substring(0, 8)}.png`;
+    };
+
+    const getFeedbackUrl = (productId: string): string => {
+      return `${
+        typeof window !== "undefined" ? window.location.origin : ""
+      }/feedback/${productId || "product_id"}`;
+    };
+
+    const downloadQRCode = async (
+      productName: string,
+      productId: string
+    ): Promise<void> => {
+      const svg = document.getElementById("feedback-qr-code");
+      if (!svg) return;
+
+      try {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const svgData = new XMLSerializer().serializeToString(svg);
+
+        // Set canvas size (3x for high quality)
+        canvas.width = 360;
+        canvas.height = 360;
+
+        await new Promise<void>((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            try {
+              ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+              const url = canvas.toDataURL("image/png");
+              const link = document.createElement("a");
+              link.href = url;
+              link.download = formatFileName(productName, productId);
+              link.click();
+              resolve();
+            } catch (error) {
+              reject(error);
+            }
+          };
+          img.onerror = reject;
+          img.src =
+            "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgData);
+        });
+      } catch (error) {
+        console.error("Failed to download QR code:", error);
+      }
+    };
+
+    const copyQRCodeToClipboard = async (productId: string): Promise<void> => {
+      const svg = document.getElementById("feedback-qr-code");
+      if (!svg) return;
+
+      try {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const svgData = new XMLSerializer().serializeToString(svg);
+
+        canvas.width = 120;
+        canvas.height = 120;
+
+        await new Promise<void>((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            try {
+              ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+              resolve();
+            } catch (error) {
+              reject(error);
+            }
+          };
+          img.onerror = reject;
+          img.src =
+            "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgData);
+        });
+
+        canvas.toBlob(async (blob) => {
+          if (blob) {
+            try {
+              await navigator.clipboard.write([
+                new ClipboardItem({ "image/png": blob }),
+              ]);
+              console.log("QR Code copied to clipboard");
+            } catch (err) {
+              console.error("Failed to copy image:", err);
+            }
+          }
+        }, "image/png");
+      } catch (error) {
+        console.error("Failed to copy QR code:", error);
+      }
+    };
 
     return (
       <ScrollArea className="h-[calc(100vh-12rem)]">
@@ -799,38 +900,182 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                 Feedback Collection
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2 space-y-2">
-              <div>
-                <Label className="text-xs">Feedback URL</Label>
-                <div className="relative">
-                  <Input
-                    value={`${
-                      typeof window !== "undefined"
-                        ? window.location.origin
-                        : ""
-                    }/feedback/${initialData?._id || "product_id"}`}
-                    readOnly
-                    className="text-xs h-7 pr-16"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="absolute right-0.5 top-0.5 h-6 text-[0.625rem]"
-                    onClick={() => {
-                      const url = `${window.location.origin}/feedback/${
-                        initialData?._id || "product_id"
-                      }`;
-                      navigator.clipboard.writeText(url);
-                    }}
-                  >
-                    Copy
-                  </Button>
-                </div>
-                <p className="text-[0.625rem] text-muted-foreground mt-0.5">
-                  Share this URL to collect feedback
-                </p>
-              </div>
+            <CardContent className="p-2">
+              <Tabs defaultValue="url" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 h-7 mb-3">
+                  <TabsTrigger value="url" className="text-xs">
+                    URL
+                  </TabsTrigger>
+                  <TabsTrigger value="qrcode" className="text-xs">
+                    QR Code
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* URL Tab */}
+                <TabsContent value="url" className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Feedback URL</Label>
+                    <div className="relative">
+                      <Input
+                        value={getFeedbackUrl(initialData?._id)}
+                        readOnly
+                        className="text-xs h-7 pr-16"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="absolute right-0.5 top-0.5 h-6 text-[0.625rem]"
+                        onClick={() => {
+                          navigator.clipboard.writeText(
+                            getFeedbackUrl(initialData?._id)
+                          );
+                        }}
+                      >
+                        Copy
+                      </Button>
+                    </div>
+                    <p className="text-[0.625rem] text-muted-foreground mt-0.5">
+                      Share this URL to collect feedback
+                    </p>
+                  </div>
+
+                  <div className="pt-2 space-y-2">
+                    <div className="grid grid-cols-2 gap-1">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-6 text-[0.625rem] px-2"
+                        onClick={() =>
+                          window.open(
+                            getFeedbackUrl(initialData?._id),
+                            "_blank"
+                          )
+                        }
+                      >
+                        Open in New Tab
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-6 text-[0.625rem] px-2"
+                        onClick={() => {
+                          navigator.clipboard.writeText(
+                            getFeedbackUrl(initialData?._id)
+                          );
+                        }}
+                      >
+                        Copy URL
+                      </Button>
+                    </div>
+
+                    <div className="space-y-1">
+                      <p className="text-[0.625rem] text-muted-foreground">
+                        <strong>URL Usage Tips:</strong>
+                      </p>
+                      <ul className="text-[0.5rem] text-muted-foreground space-y-0.5">
+                        <li>
+                          • Share via email, messaging apps, or social media
+                        </li>
+                        <li>• Embed in websites or digital signatures</li>
+                        <li>
+                          • Include in printed materials with URL shortener
+                        </li>
+                        <li>• Track clicks with URL parameters if needed</li>
+                      </ul>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* QR Code Tab */}
+                <TabsContent value="qrcode" className="space-y-3">
+                  <div className="flex flex-col items-center space-y-3">
+                    <div className="p-3 bg-white rounded border">
+                      <QRCodeSVG
+                        id="feedback-qr-code"
+                        value={getFeedbackUrl(initialData?._id)}
+                        size={140}
+                        level="H"
+                        includeMargin={true}
+                        bgColor="#ffffff"
+                        fgColor="#000000"
+                      />
+                    </div>
+                    <p className="text-[0.5rem] text-muted-foreground text-center">
+                      Scan this QR code with any smartphone camera
+                    </p>
+                  </div>
+
+                  <div className="pt-2 space-y-2">
+                    <div className="grid grid-cols-2 gap-1">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-6 text-[0.625rem] px-2"
+                        onClick={() =>
+                          downloadQRCode(
+                            formData.name || "product",
+                            initialData?._id || "product_id"
+                          )
+                        }
+                      >
+                        Download PNG
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-6 text-[0.625rem] px-2"
+                        onClick={() =>
+                          copyQRCodeToClipboard(
+                            initialData?._id || "product_id"
+                          )
+                        }
+                      >
+                        Copy Image
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-6 text-[0.625rem] px-2 col-span-2"
+                        onClick={() =>
+                          window.open(
+                            getFeedbackUrl(initialData?._id),
+                            "_blank"
+                          )
+                        }
+                      >
+                        Open Feedback Form
+                      </Button>
+                    </div>
+
+                    <div className="space-y-1">
+                      <p className="text-[0.625rem] text-muted-foreground">
+                        <strong>QR Code Best Practices:</strong>
+                      </p>
+                      <ul className="text-[0.5rem] text-muted-foreground space-y-0.5">
+                        <li>
+                          • Print at least 2x2 inches (5x5 cm) for scanning
+                        </li>
+                        <li>• Place in visible locations with good lighting</li>
+                        <li>
+                          • Test scan with multiple devices before printing
+                        </li>
+                        <li>
+                          • Maintain white border (quiet zone) around QR code
+                        </li>
+                        <li>
+                          • Use high contrast colors for better readability
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </div>
