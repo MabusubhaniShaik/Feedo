@@ -1,14 +1,14 @@
 import AuthGuard from "@/components/AuthGuard";
 import Image from "next/image";
-import LogoImg from "@/app/assets/FeedO_logo.jpg";
+import LogoImg from "@/app/assets/FeedO_logo.png";
 
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <AuthGuard mode="auth">
-      <div className="min-h-screen grid grid-cols-1 md:grid-cols-2">
+      <div className="min-h-screen grid grid-cols-1 md:grid-cols-2 m-0 p-0">
         {/* Left Section with Logo */}
         <div className="hidden md:flex bg-black text-white flex-col items-center justify-center px-12">
-          <div className="mb-8">
+          <div className="mb-0">
             <Image
               src={LogoImg}
               alt="Feedo Logo"
@@ -18,7 +18,7 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
               priority
             />
           </div>
-          <h1 className="text-4xl font-bold mb-4">Feedo</h1>
+          <h1 className="text-4xl font-bold mb-0">Feedo</h1>
           <p className="text-lg text-gray-300 max-w-md text-center">
             Collect feedback effortlessly, analyze insights instantly, and
             improve your product experience with confidence.
