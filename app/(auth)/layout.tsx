@@ -1,6 +1,6 @@
 import AuthGuard from "@/components/AuthGuard";
 import Image from "next/image";
-import LogoImg from "@/public/assests/FeedO_logo.png";
+import LogoImg from "@/app/assets/FeedO_logo.jpg";
 
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (
