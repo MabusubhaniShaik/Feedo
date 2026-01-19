@@ -144,7 +144,7 @@ const ProductFeedback = () => {
           setProduct(productData);
 
           const initialStates = productData.questions.reduce(
-            (acc, q) => {
+            (acc: any, q: any) => {
               acc.ratings[q._id] = 0;
               acc.comments[q._id] = "";
               return acc;
@@ -152,7 +152,7 @@ const ProductFeedback = () => {
             {
               ratings: {} as Record<string, number>,
               comments: {} as Record<string, string>,
-            }
+            },
           );
 
           setRatings(initialStates.ratings);
@@ -173,7 +173,7 @@ const ProductFeedback = () => {
   const handleInputChange = (
     type: "comment" | "user",
     id: string,
-    value: string
+    value: string,
   ) => {
     if (type === "comment") {
       setComments((prev) => ({ ...prev, [id]: value }));
@@ -281,7 +281,7 @@ const ProductFeedback = () => {
       {
         ratings: {} as Record<string, number>,
         comments: {} as Record<string, string>,
-      }
+      },
     );
 
     setRatings(clearedStates.ratings);
@@ -493,7 +493,7 @@ const ProductFeedback = () => {
                             handleInputChange(
                               "comment",
                               question._id,
-                              e.target.value
+                              e.target.value,
                             )
                           }
                           placeholder="Share your detailed feedback here..."
