@@ -212,19 +212,6 @@ const ProductCreate = () => {
           />
         </CardContent>
       </Card>
-
-      {/* Quick Tips */}
-      <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <h3 className="text-[0.875rem] font-medium text-blue-800 mb-2">
-          💡 Quick Tips:
-        </h3>
-        <ul className="text-[0.75rem] text-blue-700 space-y-1">
-          <li>• Product code will be automatically generated</li>
-          <li>• Add at least one category for better organization</li>
-          <li>• Include review questions to collect customer feedback</li>
-          <li>• Products are active by default (can be changed later)</li>
-        </ul>
-      </div>
     </div>
   );
 };

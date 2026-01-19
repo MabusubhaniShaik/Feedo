@@ -66,7 +66,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
       loading = false,
       productOwners = [],
     }: ProductFormProps,
-    ref
+    ref,
   ) => {
     const [formData, setFormData] = useState({
       product_code: "",
@@ -119,7 +119,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
         ];
 
         const questionsValid = formData.questions.every(
-          (q) => q.question_text.trim() && q.info.trim()
+          (q) => q.question_text.trim() && q.info.trim(),
         );
 
         return (
@@ -168,7 +168,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
     useEffect(() => {
       if (formData.product_owner_id && productOwners.length > 0) {
         const owner = productOwners.find(
-          (o: any) => o._id === formData.product_owner_id
+          (o: any) => o._id === formData.product_owner_id,
         );
         if (owner) {
           setFormData((prev) => ({
@@ -180,7 +180,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
     }, [formData.product_owner_id, productOwners]);
 
     const handleInputChange = (
-      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => {
       const { name, value } = e.target;
       setFormData((prev) => ({
@@ -252,11 +252,11 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
         setFormData((prev) => ({
           ...prev,
           questions: prev.questions.map((q, i) =>
-            i === index ? { ...q, [field]: value } : q
+            i === index ? { ...q, [field]: value } : q,
           ),
         }));
       },
-      []
+      [],
     );
 
     const handleRemoveQuestion = useCallback((index: number) => {
@@ -274,6 +274,8 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
     };
 
     const isViewMode = mode === "view";
+    const isCreateMode = mode === "create";
+
     const isDisabled = isViewMode || loading;
 
     // Helper functions section
@@ -293,7 +295,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
 
     const downloadQRCode = async (
       productName: string,
-      productId: string
+      productId: string,
     ): Promise<void> => {
       const svg = document.getElementById("feedback-qr-code");
       if (!svg) return;
@@ -670,7 +672,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                                   handleUpdateQuestion(
                                     index,
                                     "question_text",
-                                    e.target.value
+                                    e.target.value,
                                   )
                                 }
                                 className="text-xs h-6 border-0 p-0 focus-visible:ring-0"
@@ -697,7 +699,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                                     handleUpdateQuestion(
                                       index,
                                       "max_rating",
-                                      e.target.value
+                                      e.target.value,
                                     )
                                   }
                                   className="text-xs h-6"
@@ -721,7 +723,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                                       handleUpdateQuestion(
                                         index,
                                         "is_active",
-                                        checked
+                                        checked,
                                       )
                                     }
                                     className="scale-75"
@@ -750,7 +752,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                                   handleUpdateQuestion(
                                     index,
                                     "info",
-                                    e.target.value
+                                    e.target.value,
                                   )
                                 }
                                 className="text-xs h-6"
@@ -893,195 +895,199 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
           )}
 
           {/* Feedback URL */}
-          <Card className="border p-2 gap-0">
-            <CardHeader className="p-1 pb-1">
-              <CardTitle className="text-sm font-medium flex items-center gap-1">
-                <MessageSquare className="h-3 w-3" />
-                Feedback Collection
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-2">
-              <Tabs defaultValue="url" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 h-7 mb-3">
-                  <TabsTrigger value="url" className="text-xs">
-                    URL
-                  </TabsTrigger>
-                  <TabsTrigger value="qrcode" className="text-xs">
-                    QR Code
-                  </TabsTrigger>
-                </TabsList>
+          {!isCreateMode && (
+            <Card className="border p-2 gap-0">
+              <CardHeader className="p-1 pb-1">
+                <CardTitle className="text-sm font-medium flex items-center gap-1">
+                  <MessageSquare className="h-3 w-3" />
+                  Feedback Collection
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2">
+                <Tabs defaultValue="url" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 h-7 mb-3">
+                    <TabsTrigger value="url" className="text-xs">
+                      URL
+                    </TabsTrigger>
+                    <TabsTrigger value="qrcode" className="text-xs">
+                      QR Code
+                    </TabsTrigger>
+                  </TabsList>
 
-                {/* URL Tab */}
-                <TabsContent value="url" className="space-y-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">Feedback URL</Label>
-                    <div className="relative">
-                      <Input
-                        value={getFeedbackUrl(initialData?._id)}
-                        readOnly
-                        className="text-xs h-7 pr-16"
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="absolute right-0.5 top-0.5 h-6 text-[0.625rem]"
-                        onClick={() => {
-                          navigator.clipboard.writeText(
-                            getFeedbackUrl(initialData?._id)
-                          );
-                        }}
-                      >
-                        Copy
-                      </Button>
-                    </div>
-                    <p className="text-[0.625rem] text-muted-foreground mt-0.5">
-                      Share this URL to collect feedback
-                    </p>
-                  </div>
-
-                  <div className="pt-2 space-y-2">
-                    <div className="grid grid-cols-2 gap-1">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-6 text-[0.625rem] px-2"
-                        onClick={() =>
-                          window.open(
-                            getFeedbackUrl(initialData?._id),
-                            "_blank"
-                          )
-                        }
-                      >
-                        Open in New Tab
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-6 text-[0.625rem] px-2"
-                        onClick={() => {
-                          navigator.clipboard.writeText(
-                            getFeedbackUrl(initialData?._id)
-                          );
-                        }}
-                      >
-                        Copy URL
-                      </Button>
-                    </div>
-
-                    <div className="space-y-1">
-                      <p className="text-[0.625rem] text-muted-foreground">
-                        <strong>URL Usage Tips:</strong>
+                  {/* URL Tab */}
+                  <TabsContent value="url" className="space-y-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Feedback URL</Label>
+                      <div className="relative">
+                        <Input
+                          value={getFeedbackUrl(initialData?._id)}
+                          readOnly
+                          className="text-xs h-7 pr-16"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="absolute right-0.5 top-0.5 h-6 text-[0.625rem]"
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              getFeedbackUrl(initialData?._id),
+                            );
+                          }}
+                        >
+                          Copy
+                        </Button>
+                      </div>
+                      <p className="text-[0.625rem] text-muted-foreground mt-0.5">
+                        Share this URL to collect feedback
                       </p>
-                      <ul className="text-[0.5rem] text-muted-foreground space-y-0.5">
-                        <li>
-                          • Share via email, messaging apps, or social media
-                        </li>
-                        <li>• Embed in websites or digital signatures</li>
-                        <li>
-                          • Include in printed materials with URL shortener
-                        </li>
-                        <li>• Track clicks with URL parameters if needed</li>
-                      </ul>
-                    </div>
-                  </div>
-                </TabsContent>
-
-                {/* QR Code Tab */}
-                <TabsContent value="qrcode" className="space-y-3">
-                  <div className="flex flex-col items-center space-y-3">
-                    <div className="p-3 bg-white rounded border">
-                      <QRCodeSVG
-                        id="feedback-qr-code"
-                        value={getFeedbackUrl(initialData?._id)}
-                        size={140}
-                        level="H"
-                        includeMargin={true}
-                        bgColor="#ffffff"
-                        fgColor="#000000"
-                      />
-                    </div>
-                    <p className="text-[0.5rem] text-muted-foreground text-center">
-                      Scan this QR code with any smartphone camera
-                    </p>
-                  </div>
-
-                  <div className="pt-2 space-y-2">
-                    <div className="grid grid-cols-2 gap-1">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-6 text-[0.625rem] px-2"
-                        onClick={() =>
-                          downloadQRCode(
-                            formData.name || "product",
-                            initialData?._id || "product_id"
-                          )
-                        }
-                      >
-                        Download PNG
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-6 text-[0.625rem] px-2"
-                        onClick={() =>
-                          copyQRCodeToClipboard(
-                            initialData?._id || "product_id"
-                          )
-                        }
-                      >
-                        Copy Image
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-6 text-[0.625rem] px-2 col-span-2"
-                        onClick={() =>
-                          window.open(
-                            getFeedbackUrl(initialData?._id),
-                            "_blank"
-                          )
-                        }
-                      >
-                        Open Feedback Form
-                      </Button>
                     </div>
 
-                    <div className="space-y-1">
-                      <p className="text-[0.625rem] text-muted-foreground">
-                        <strong>QR Code Best Practices:</strong>
+                    <div className="pt-2 space-y-2">
+                      <div className="grid grid-cols-2 gap-1">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-6 text-[0.625rem] px-2"
+                          onClick={() =>
+                            window.open(
+                              getFeedbackUrl(initialData?._id),
+                              "_blank",
+                            )
+                          }
+                        >
+                          Open in New Tab
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-6 text-[0.625rem] px-2"
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              getFeedbackUrl(initialData?._id),
+                            );
+                          }}
+                        >
+                          Copy URL
+                        </Button>
+                      </div>
+
+                      <div className="space-y-1">
+                        <p className="text-[0.625rem] text-muted-foreground">
+                          <strong>URL Usage Tips:</strong>
+                        </p>
+                        <ul className="text-[0.5rem] text-muted-foreground space-y-0.5">
+                          <li>
+                            • Share via email, messaging apps, or social media
+                          </li>
+                          <li>• Embed in websites or digital signatures</li>
+                          <li>
+                            • Include in printed materials with URL shortener
+                          </li>
+                          <li>• Track clicks with URL parameters if needed</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  {/* QR Code Tab */}
+                  <TabsContent value="qrcode" className="space-y-3">
+                    <div className="flex flex-col items-center space-y-3">
+                      <div className="p-3 bg-white rounded border">
+                        <QRCodeSVG
+                          id="feedback-qr-code"
+                          value={getFeedbackUrl(initialData?._id)}
+                          size={140}
+                          level="H"
+                          includeMargin={true}
+                          bgColor="#ffffff"
+                          fgColor="#000000"
+                        />
+                      </div>
+                      <p className="text-[0.5rem] text-muted-foreground text-center">
+                        Scan this QR code with any smartphone camera
                       </p>
-                      <ul className="text-[0.5rem] text-muted-foreground space-y-0.5">
-                        <li>
-                          • Print at least 2x2 inches (5x5 cm) for scanning
-                        </li>
-                        <li>• Place in visible locations with good lighting</li>
-                        <li>
-                          • Test scan with multiple devices before printing
-                        </li>
-                        <li>
-                          • Maintain white border (quiet zone) around QR code
-                        </li>
-                        <li>
-                          • Use high contrast colors for better readability
-                        </li>
-                      </ul>
                     </div>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
+
+                    <div className="pt-2 space-y-2">
+                      <div className="grid grid-cols-2 gap-1">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-6 text-[0.625rem] px-2"
+                          onClick={() =>
+                            downloadQRCode(
+                              formData.name || "product",
+                              initialData?._id || "product_id",
+                            )
+                          }
+                        >
+                          Download PNG
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-6 text-[0.625rem] px-2"
+                          onClick={() =>
+                            copyQRCodeToClipboard(
+                              initialData?._id || "product_id",
+                            )
+                          }
+                        >
+                          Copy Image
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-6 text-[0.625rem] px-2 col-span-2"
+                          onClick={() =>
+                            window.open(
+                              getFeedbackUrl(initialData?._id),
+                              "_blank",
+                            )
+                          }
+                        >
+                          Open Feedback Form
+                        </Button>
+                      </div>
+
+                      <div className="space-y-1">
+                        <p className="text-[0.625rem] text-muted-foreground">
+                          <strong>QR Code Best Practices:</strong>
+                        </p>
+                        <ul className="text-[0.5rem] text-muted-foreground space-y-0.5">
+                          <li>
+                            • Print at least 2x2 inches (5x5 cm) for scanning
+                          </li>
+                          <li>
+                            • Place in visible locations with good lighting
+                          </li>
+                          <li>
+                            • Test scan with multiple devices before printing
+                          </li>
+                          <li>
+                            • Maintain white border (quiet zone) around QR code
+                          </li>
+                          <li>
+                            • Use high contrast colors for better readability
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </ScrollArea>
     );
-  }
+  },
 );
 
 ProductForm.displayName = "ProductForm";

@@ -123,7 +123,7 @@ export default function DashboardPage() {
         reviewAnalytics: true,
       });
 
-      const [ownerStatsRes, reviewAnalyticsRes] = await Promise.all([
+      const [ownerStatsRes, reviewAnalyticsRes]: any = await Promise.all([
         apiService.get<{ data: OwnerStatsData }>("/statistics/owner-stats", {
           product_owner_id: productOwnerId,
         }),
@@ -162,7 +162,7 @@ export default function DashboardPage() {
 
   const fetchProductStats = async (productId: string) => {
     try {
-      const response = await apiService.get<{ data: ProductStatsData }>(
+      const response: any = await apiService.get<{ data: ProductStatsData }>(
         "/statistics/product-stats",
         { product_id: productId }
       );

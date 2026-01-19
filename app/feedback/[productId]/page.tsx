@@ -135,7 +135,7 @@ const ProductFeedback = () => {
 
     const fetchProduct = async () => {
       try {
-        const response = await apiService.get<{
+        const response: any = await apiService.get<{
           status: string;
           data: Product[];
         }>(`/product/${productId}`);

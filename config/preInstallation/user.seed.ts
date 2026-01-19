@@ -87,7 +87,7 @@ const main = async () => {
     const preview = await userCollection.find().limit(5).toArray();
     console.log("👀 Sample users:");
     preview.forEach((u: any) =>
-      console.log(`- ${u.user_id} | ${u.role_name} | ${u.email}`)
+      console.log(`- ${u.user_id} | ${u.role_name} | ${u.email}`),
     );
   } catch (error) {
     console.error("User seeding failed:", error);

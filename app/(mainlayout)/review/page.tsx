@@ -141,7 +141,7 @@ const ReviewPage = () => {
           sort: sortMapping[filters.sortBy],
         };
 
-        const response = await apiService.get<ApiResponse>(
+        const response: any = await apiService.get<ApiResponse>(
           "/product-review",
           params
         );

@@ -31,7 +31,7 @@ const ProfilePage = () => {
     confirmPassword: "",
   });
   const [passwordErrors, setPasswordErrors] = useState<Record<string, string>>(
-    {}
+    {},
   );
 
   // Set mode based on URL parameter
@@ -40,6 +40,20 @@ const ProfilePage = () => {
       setMode("edit");
     }
   }, [isEdit]);
+
+  const getCurrentUserInfo = () => {
+    if (typeof window === "undefined") return null;
+    try {
+      const userInfoStr = sessionStorage.getItem("user_info");
+      return userInfoStr ? JSON.parse(userInfoStr) : null;
+    } catch (e) {
+      console.error("Error reading user info from session storage:", e);
+      return null;
+    }
+  };
+
+  const currentUserInfo = getCurrentUserInfo();
+  const isDemoUser = userData?.user_id === "USE25-002";
 
   const fetchUserData = async () => {
     try {
@@ -191,6 +205,11 @@ const ProfilePage = () => {
           <User className="h-4 w-4" />
           <h1 className="text-[14px] font-bold">
             {mode === "edit" ? "Edit User Profile" : "User Profile"}
+            {userData?.user_id === "USE25-002" && (
+              <span className="ml-2 text-[10px] font-normal text-amber-600 bg-amber-50 px-2 py-0.5 rounded">
+                Demo Account
+              </span>
+            )}
           </h1>
         </div>
 
@@ -199,6 +218,8 @@ const ProfilePage = () => {
             onClick={handleEditClick}
             size="sm"
             className="h-6 px-3 text-[10px] rounded-[3px]"
+            disabled={isDemoUser}
+            title={isDemoUser ? "Demo account cannot be edited" : ""}
           >
             Edit Profile
           </Button>
@@ -207,8 +228,9 @@ const ProfilePage = () => {
             <Button
               onClick={handleSubmit}
               size="sm"
-              disabled={saving}
+              disabled={saving || isDemoUser}
               className="h-6 px-3 text-[10px] rounded-[3px]"
+              title={isDemoUser ? "Demo account cannot be edited" : ""}
             >
               {saving ? "Updating..." : "Update Profile"}
             </Button>

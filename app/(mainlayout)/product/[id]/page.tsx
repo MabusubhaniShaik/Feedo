@@ -231,7 +231,7 @@ export default function ProductDetailPage() {
                 <Eye className="h-2.5 w-2.5" />
                 Feedback
               </Button>
-              <Button
+              {/* <Button
                 variant="outline"
                 onClick={handleViewReports}
                 className="text-[0.625rem] h-6 px-2 gap-1"
@@ -239,7 +239,7 @@ export default function ProductDetailPage() {
               >
                 <BarChart3 className="h-2.5 w-2.5" />
                 Reports
-              </Button>
+              </Button> */}
               <Button
                 onClick={handleCopyFeedbackUrl}
                 className="text-[0.625rem] h-6 px-2 gap-1"
