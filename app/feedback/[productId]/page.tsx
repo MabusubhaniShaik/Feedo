@@ -7,16 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Info, CheckCircle } from "lucide-react";
+import { toast } from "sonner";
 import {
   Tooltip,
   TooltipContent,
@@ -227,7 +222,7 @@ const ProductFeedback = () => {
 
       // Check if there are any valid ratings
       if (reviewInfoArray.length === 0) {
-        alert("Please provide at least one rating (minimum 1 star)");
+        toast.error("Please provide at least one rating (minimum 1 star)");
         setSubmitting(false);
         return;
       }
@@ -249,12 +244,10 @@ const ProductFeedback = () => {
       };
 
       // Submit to API
-      const response = await apiService.post<{
+      await apiService.post<{
         status: string;
         message: string;
       }>("/product-review", feedbackPayload);
-
-      console.log("Feedback submitted successfully:", response);
 
       // Update URL with query parameter
       router.push(`/feedback/${productId}?isFeedBackSubmited=true`);
@@ -263,7 +256,7 @@ const ProductFeedback = () => {
       handleClear();
     } catch (error: any) {
       console.error("Submission error:", error);
-      alert(error.message || "Failed to submit feedback");
+      toast.error(error.message || "Failed to submit feedback");
     } finally {
       setSubmitting(false);
     }
@@ -292,30 +285,35 @@ const ProductFeedback = () => {
 
   if (isFeedbackSubmitted) {
     return (
-      <div className="min-h-screen bg-background p-4 md:p-6">
-        <div className="max-w-4xl mx-auto">
-          <Card className="border-green-200">
+      <div className="min-h-screen bg-background p-4 md:p-8">
+        <div className="mx-auto max-w-4xl">
+          <Card className="border-gold/40 shadow-luxury">
             <CardContent className="pt-6">
-              <div className="flex flex-col items-center justify-center text-center py-12">
-                <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-6">
-                  <CheckCircle className="h-10 w-10 text-green-600" />
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-gold/40 bg-[var(--accent)]">
+                  <CheckCircle className="h-10 w-10 text-gold" />
                 </div>
-                <h1 className="text-2xl font-bold text-green-700 mb-3">
+                <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-gold">
+                  Received
+                </p>
+                <h1 className="gold-text mb-4 mt-3 text-4xl font-semibold tracking-tight">
                   Thank You for Your Feedback!
                 </h1>
-                <p className="text-muted-foreground mb-6 max-w-md">
+                <div className="gold-rule mb-6 h-px w-32" />
+                <p className="mb-6 max-w-md text-sm text-muted-foreground">
                   Your valuable feedback has been submitted successfully. We
                   appreciate you taking the time to share your experience with
                   us.
                 </p>
                 <div className="space-y-3">
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     Your feedback helps us improve our products and services.
                   </p>
                   <div className="pt-4">
                     <Button
                       onClick={() => router.push(`/feedback/${productId}`)}
                       variant="outline"
+                      className="border-gold/40 text-gold hover:bg-[var(--accent)] hover:text-gold-soft"
                     >
                       Go Back to Product
                     </Button>
@@ -331,8 +329,11 @@ const ProductFeedback = () => {
 
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse">Loading...</div>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
       </div>
     );
   }
@@ -341,7 +342,7 @@ const ProductFeedback = () => {
     switch (sectionId) {
       case "product":
         return (
-          <Card>
+          <Card className="shadow-luxury">
             <div className="p-6">
               <div className="space-y-4">
                 <div>
@@ -385,7 +386,7 @@ const ProductFeedback = () => {
 
       case "user":
         return (
-          <Card>
+          <Card className="shadow-luxury">
             <div className="p-6">
               <div className="grid md:grid-cols-3 gap-4">
                 {config.userFields.map((field) => (
@@ -423,7 +424,7 @@ const ProductFeedback = () => {
 
       case "feedback":
         return (
-          <Card>
+          <Card className="shadow-luxury">
             <div className="p-6">
               <div className="space-y-6">
                 {product.questions.map((question, idx) => (
@@ -473,9 +474,15 @@ const ProductFeedback = () => {
                               onClick={() =>
                                 handleRatingChange(question._id, i + 1)
                               }
-                              className="h-8 w-8 hover:bg-transparent"
+                              className="h-9 w-9 rounded-md hover:bg-[var(--accent)]"
                             >
-                              <span className="text-2xl">
+                              <span
+                                className={`text-2xl ${
+                                  i + 1 <= (ratings[question._id] || 0)
+                                    ? "text-gold"
+                                    : "text-muted-foreground/40"
+                                }`}
+                              >
                                 {i + 1 <= (ratings[question._id] || 0)
                                   ? "★"
                                   : "☆"}
@@ -514,11 +521,17 @@ const ProductFeedback = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="space-y-2">
-          <h1 className="text-2xl font-bold">Product Feedback</h1>
-          <p className="text-muted-foreground text-sm">
+    <div className="min-h-screen bg-background p-4 md:p-8">
+      <div className="mx-auto max-w-4xl space-y-8">
+        <div>
+          <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-gold">
+            Feedo
+          </p>
+          <h1 className="mt-1 text-4xl font-semibold tracking-tight">
+            Product Feedback
+          </h1>
+          <div className="gold-rule mt-3 h-px w-24" />
+          <p className="mt-3 text-sm text-muted-foreground">
             Share your experience with {product.name}
           </p>
         </div>
@@ -526,7 +539,9 @@ const ProductFeedback = () => {
         {config.sections.map((section) => (
           <div key={section.id}>
             <div className="mb-3">
-              <h2 className="text-lg font-semibold">{section.title}</h2>
+              <h2 className="font-display text-lg font-semibold">
+                {section.title}
+              </h2>
               <p className="text-sm text-muted-foreground">
                 {section.description}
               </p>
@@ -535,11 +550,16 @@ const ProductFeedback = () => {
           </div>
         ))}
 
-        <div className="flex justify-end gap-3 pt-4">
-          <Button variant="outline" onClick={handleClear} disabled={submitting}>
+        <div className="flex justify-end gap-3 border-t border-border pt-6">
+          <Button
+            variant="outline"
+            onClick={handleClear}
+            disabled={submitting}
+            className="border-gold/40 text-gold hover:bg-[var(--accent)] hover:text-gold-soft"
+          >
             Clear Form
           </Button>
-          <Button onClick={handleSubmit} disabled={submitting}>
+          <Button onClick={handleSubmit} disabled={submitting} className="px-8">
             {submitting ? "Submitting..." : "Submit Feedback"}
           </Button>
         </div>

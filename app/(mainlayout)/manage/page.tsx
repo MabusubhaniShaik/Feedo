@@ -6,10 +6,11 @@ import { apiService } from "@/helpers/api.service";
 import { DataTable } from "@/components/common/DataTable";
 import { DataDialog } from "@/components/common/DataDialog";
 import { UserForm, UserFormRef } from "@/components/forms/UserForm";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, UserPlus, Edit, Trash2, Eye } from "lucide-react";
+import { RefreshCw, UserPlus, Edit, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface User {
   _id: string;
@@ -74,7 +75,7 @@ const ManagePage = () => {
       fetchUsers();
     } catch (error) {
       console.error("Error deleting user:", error);
-      alert("Failed to delete user");
+      toast.error("Failed to delete user");
     }
   };
 
@@ -107,9 +108,10 @@ const ManagePage = () => {
       }
       setDialogOpen(false);
       fetchUsers();
+      toast.success(dialogMode === "create" ? "User created" : "User updated");
     } catch (error) {
       console.error("Error saving user:", error);
-      alert("Failed to save user");
+      toast.error("Failed to save user");
     } finally {
       setFormLoading(false);
     }
@@ -142,7 +144,11 @@ const ManagePage = () => {
       cell: (user: User) => (
         <Badge
           variant={user.role_name === "Admin" ? "default" : "secondary"}
-          className="text-[0.625rem]"
+          className={
+            user.role_name === "Admin"
+              ? "border-gold/40 bg-[var(--accent)] text-gold"
+              : "text-[0.7rem]"
+          }
         >
           {user.role_name}
         </Badge>
@@ -155,7 +161,7 @@ const ManagePage = () => {
       cell: (user: User) => (
         <Badge
           variant={user.is_active ? "default" : "destructive"}
-          className="text-[0.625rem]"
+          className="text-[0.7rem]"
         >
           {user.is_active ? "Active" : "Inactive"}
         </Badge>
@@ -180,24 +186,24 @@ const ManagePage = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="text-[0.75rem] h-6 px-2 rounded-[3px]"
+            className="h-8 w-8 rounded-md text-gold hover:bg-[var(--accent)] hover:text-gold-soft"
             onClick={(e) => {
               e.stopPropagation();
               handleEdit(user);
             }}
           >
-            <Edit className="h-3 w-3" />
+            <Edit className="h-3.5 w-3.5" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6 text-red-600 hover:text-red-700"
+            className="h-8 w-8 text-destructive hover:bg-destructive/10"
             onClick={(e) => {
               e.stopPropagation();
               handleDelete(user._id);
             }}
           >
-            <Trash2 className="h-3 w-3" />
+            <Trash2 className="h-3.5 w-3.5" />
           </Button>
         </div>
       ),
@@ -205,33 +211,44 @@ const ManagePage = () => {
   ];
 
   return (
-    <div className="container mx-auto p-0">
-      <Card className="text-[0.875rem]">
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle className="text-[1rem]">User Management</CardTitle>
-            <div className="flex gap-2">
-              <Button
-                onClick={handleCreate}
-                size="sm"
-                className="text-[0.75rem] h-6 px-2 rounded-[3px]"
-              >
-                <UserPlus className="h-2 w-2 mr-1" />
-                Add User
-              </Button>
-              <Button
-                onClick={fetchUsers}
-                variant="outline"
-                size="sm"
-                className="text-[0.75rem] h-6 px-2 rounded-[3px]"
-              >
-                <RefreshCw className="h-2 w-2 mr-1" />
-                Refresh
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
+    <div className="mx-auto max-w-7xl space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-gold">
+            Administration
+          </p>
+          <h1 className="mt-2 text-4xl font-semibold tracking-tight">
+            User Management
+          </h1>
+          <div className="gold-rule mt-3 h-px w-24" />
+          <p className="mt-3 text-sm text-muted-foreground">
+            Create, review and manage user accounts and roles.
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <Button
+            onClick={fetchUsers}
+            variant="outline"
+            size="sm"
+            className="h-9 gap-1.5 border-gold/40 px-4 text-gold hover:bg-[var(--accent)] hover:text-gold-soft"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Refresh
+          </Button>
+          <Button
+            onClick={handleCreate}
+            size="sm"
+            className="h-9 gap-1.5 px-4"
+          >
+            <UserPlus className="h-3.5 w-3.5" />
+            Add User
+          </Button>
+        </div>
+      </div>
+
+      <Card className="shadow-luxury">
+        <CardContent className="p-4">
           <DataTable
             data={users}
             columns={columns}

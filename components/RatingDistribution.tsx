@@ -6,15 +6,13 @@ interface RatingDistributionProps {
 }
 
 export default function RatingDistribution({ data }: RatingDistributionProps) {
-  console.log(":::::: data", data);
-
-  // Define star ratings in reverse order (5 to 1) with colors
+  // Define star ratings in reverse order (5 to 1) — champagne intensity ramp
   const starRatings = [
-    { stars: 5, label: "5", color: "bg-green-500" },
-    { stars: 4, label: "4", color: "bg-lime-500" },
-    { stars: 3, label: "3", color: "bg-yellow-500" },
-    { stars: 2, label: "2", color: "bg-orange-500" },
-    { stars: 1, label: "1", color: "bg-red-500" },
+    { stars: 5, label: "5", color: "bg-gold" },
+    { stars: 4, label: "4", color: "bg-gold/75" },
+    { stars: 3, label: "3", color: "bg-gold/55" },
+    { stars: 2, label: "2", color: "bg-gold/38" },
+    { stars: 1, label: "1", color: "bg-gold/22" },
   ];
 
   // Transform API data to match individual star ratings
@@ -48,12 +46,14 @@ export default function RatingDistribution({ data }: RatingDistributionProps) {
 
   if (data.length === 0) {
     return (
-      <Card className="text-[10px]">
+      <Card className="shadow-luxury">
         <CardHeader className="pb-2">
-          <CardTitle className="text-[12px]">Rating Distribution</CardTitle>
+          <CardTitle className="font-display text-base font-semibold">
+            Rating Distribution
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-center py-4">
+          <p className="py-4 text-center text-sm text-muted-foreground">
             No rating data
           </p>
         </CardContent>
@@ -64,16 +64,21 @@ export default function RatingDistribution({ data }: RatingDistributionProps) {
   const maxCount = Math.max(...transformedData.map((d) => d.count), 1);
 
   return (
-    <Card className="text-[10px]">
+    <Card className="shadow-luxury">
       <CardHeader className="pb-2">
-        <CardTitle className="text-[12px]">Rating Distribution</CardTitle>
+        <CardTitle className="font-display text-base font-semibold">
+          Rating Distribution
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
           {transformedData.map((item) => (
-            <div key={item.stars} className="flex items-center gap-2">
+            <div key={item.stars} className="flex items-center gap-3">
               {/* Star label */}
-              <div className="w-6 text-right font-medium">{item.label} ★</div>
+              <div className="w-7 text-right text-sm font-medium">
+                {item.label}
+                <span className="ml-0.5 text-gold">★</span>
+              </div>
 
               {/* Color bar */}
               <div className="flex-1">
@@ -86,9 +91,9 @@ export default function RatingDistribution({ data }: RatingDistributionProps) {
               </div>
 
               {/* Count and percentage */}
-              <div className="w-16 text-right">
+              <div className="w-20 text-right text-sm">
                 <span className="font-medium">{item.count}</span>
-                <span className="text-muted-foreground ml-1">
+                <span className="ml-1 text-muted-foreground">
                   ({item.percentage.toFixed(1)}%)
                 </span>
               </div>
@@ -97,9 +102,11 @@ export default function RatingDistribution({ data }: RatingDistributionProps) {
         </div>
 
         {/* Summary row */}
-        <div className="flex items-center justify-between mt-4 pt-3 border-t">
-          <span className="font-medium">Total Ratings</span>
-          <span className="font-medium">
+        <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-sm">
+          <span className="font-medium text-muted-foreground">
+            Total Ratings
+          </span>
+          <span className="font-semibold text-gold">
             {transformedData.reduce((sum, item) => sum + item.count, 0)}
           </span>
         </div>

@@ -66,7 +66,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
       loading = false,
       productOwners = [],
     }: ProductFormProps,
-    ref,
+    ref
   ) => {
     const [formData, setFormData] = useState({
       product_code: "",
@@ -119,7 +119,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
         ];
 
         const questionsValid = formData.questions.every(
-          (q) => q.question_text.trim() && q.info.trim(),
+          (q) => q.question_text.trim() && q.info.trim()
         );
 
         return (
@@ -168,7 +168,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
     useEffect(() => {
       if (formData.product_owner_id && productOwners.length > 0) {
         const owner = productOwners.find(
-          (o: any) => o._id === formData.product_owner_id,
+          (o: any) => o._id === formData.product_owner_id
         );
         if (owner) {
           setFormData((prev) => ({
@@ -180,7 +180,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
     }, [formData.product_owner_id, productOwners]);
 
     const handleInputChange = (
-      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ) => {
       const { name, value } = e.target;
       setFormData((prev) => ({
@@ -252,11 +252,11 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
         setFormData((prev) => ({
           ...prev,
           questions: prev.questions.map((q, i) =>
-            i === index ? { ...q, [field]: value } : q,
+            i === index ? { ...q, [field]: value } : q
           ),
         }));
       },
-      [],
+      []
     );
 
     const handleRemoveQuestion = useCallback((index: number) => {
@@ -295,7 +295,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
 
     const downloadQRCode = async (
       productName: string,
-      productId: string,
+      productId: string
     ): Promise<void> => {
       const svg = document.getElementById("feedback-qr-code");
       if (!svg) return;
@@ -366,7 +366,6 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
               await navigator.clipboard.write([
                 new ClipboardItem({ "image/png": blob }),
               ]);
-              console.log("QR Code copied to clipboard");
             } catch (err) {
               console.error("Failed to copy image:", err);
             }
@@ -379,15 +378,15 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
 
     return (
       <ScrollArea className="h-[calc(100vh-12rem)]">
-        <div className="space-y-3 text-xs">
+        <div className="space-y-4 text-sm">
           {/* Basic Information */}
-          <Card className="border p-2 gap-0">
-            <CardHeader className="p-1 pb-1">
-              <CardTitle className="text-sm font-medium">
+          <Card className="shadow-luxury">
+            <CardHeader className="p-4 pb-2">
+              <CardTitle className="font-display text-base font-semibold">
                 Basic Information
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-3 pt-2 space-y-4">
+            <CardContent className="p-4 pt-1 space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs flex items-center gap-1">
@@ -395,7 +394,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                     Product Code
                   </Label>
                   {isViewMode ? (
-                    <div className="text-xs p-2 border rounded bg-muted min-h-[2rem] flex items-center">
+                    <div className="text-sm p-2 border-border rounded-lg bg-black/20 min-h-[2rem] flex items-center">
                       {formData.product_code || "-"}
                     </div>
                   ) : (
@@ -404,7 +403,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                       value={formData.product_code}
                       onChange={handleInputChange}
                       disabled={mode === "edit"} // Only disabled in edit mode, enabled in create mode
-                      className="text-xs h-8"
+                      className="text-sm h-9"
                       placeholder="SKN-VITC-001"
                       required
                     />
@@ -414,7 +413,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                 <div className="space-y-1.5">
                   <Label className="text-xs">Product Name</Label>
                   {isViewMode ? (
-                    <div className="text-xs p-2 border rounded bg-muted min-h-[2rem] flex items-center">
+                    <div className="text-sm p-2 border-border rounded-lg bg-black/20 min-h-[2rem] flex items-center">
                       {formData.name || "-"}
                     </div>
                   ) : (
@@ -423,7 +422,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                       value={formData.name}
                       onChange={handleInputChange}
                       disabled={isDisabled}
-                      className="text-xs h-8"
+                      className="text-sm h-9"
                       placeholder="Vitamin C Serum"
                       required
                     />
@@ -434,7 +433,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
               <div className="space-y-1.5">
                 <Label className="text-xs">Description</Label>
                 {isViewMode ? (
-                  <div className="text-xs p-2 border rounded bg-muted min-h-[3.5rem]">
+                  <div className="text-sm p-2 border-border rounded-lg bg-black/20 min-h-[3.5rem]">
                     {formData.description || "-"}
                   </div>
                 ) : (
@@ -456,7 +455,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                     Price ($)
                   </Label>
                   {isViewMode ? (
-                    <div className="text-xs p-2 border rounded bg-muted min-h-[2rem] flex items-center">
+                    <div className="text-sm p-2 border-border rounded-lg bg-black/20 min-h-[2rem] flex items-center">
                       ${formData.price?.toFixed(2) || "0.00"}
                     </div>
                   ) : (
@@ -466,7 +465,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                       value={formData.price}
                       onChange={handleInputChange}
                       disabled={isDisabled}
-                      className="text-xs h-8"
+                      className="text-sm h-9"
                       placeholder="39.99"
                       min="0"
                       step="0.01"
@@ -477,7 +476,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                 <div className="space-y-1.5">
                   <Label className="text-xs">Status</Label>
                   {isViewMode ? (
-                    <div className="text-xs p-2 border rounded bg-muted min-h-[2rem] flex items-center">
+                    <div className="text-sm p-2 border-border rounded-lg bg-black/20 min-h-[2rem] flex items-center">
                       {formData.is_active ? "Active" : "Inactive"}
                     </div>
                   ) : (
@@ -499,19 +498,19 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
           </Card>
 
           {/* Product Owner */}
-          <Card className="border p-2 gap-0">
-            <CardHeader className="p-1 pb-1">
-              <CardTitle className="text-sm font-medium flex items-center gap-1">
+          <Card className="shadow-luxury">
+            <CardHeader className="p-4 pb-2">
+              <CardTitle className="font-display text-base font-semibold flex items-center gap-1">
                 <User className="h-3 w-3" />
                 Product Owner
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2 space-y-3">
+            <CardContent className="p-4 space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <Label className="text-xs">Owner ID</Label>
                   {isViewMode ? (
-                    <div className="text-xs p-1 border rounded bg-muted min-h-[1.75rem] flex items-center">
+                    <div className="text-sm p-1 border-border rounded-lg bg-black/20 min-h-[1.75rem] flex items-center">
                       {formData.product_owner_id || "-"}
                     </div>
                   ) : productOwners.length > 0 ? (
@@ -520,7 +519,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                       onValueChange={handleSelectChange}
                       disabled={isDisabled}
                     >
-                      <SelectTrigger className="text-xs h-7">
+                      <SelectTrigger className="text-sm h-8">
                         <SelectValue placeholder="Select owner" />
                       </SelectTrigger>
                       <SelectContent>
@@ -541,7 +540,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                       value={formData.product_owner_id}
                       onChange={handleInputChange}
                       disabled={isDisabled}
-                      className="text-xs h-7"
+                      className="text-sm h-8"
                       placeholder="694929f5c1bf47b0260d8380"
                       required
                     />
@@ -551,7 +550,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                 <div>
                   <Label className="text-xs">Owner Name</Label>
                   {isViewMode ? (
-                    <div className="text-xs p-1 border rounded bg-muted min-h-[1.75rem] flex items-center">
+                    <div className="text-sm p-1 border-border rounded-lg bg-black/20 min-h-[1.75rem] flex items-center">
                       {formData.product_owner_name || "-"}
                     </div>
                   ) : (
@@ -560,7 +559,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                       value={formData.product_owner_name}
                       onChange={handleInputChange}
                       disabled={isDisabled}
-                      className="text-xs h-7"
+                      className="text-sm h-8"
                       placeholder="Annetta Padberg"
                       required
                     />
@@ -571,18 +570,18 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
           </Card>
 
           {/* Categories */}
-          <Card className="border p-2 gap-0">
-            <CardHeader className="p-1 pb-1">
-              <CardTitle className="text-sm font-medium">Categories</CardTitle>
+          <Card className="shadow-luxury">
+            <CardHeader className="p-4 pb-2">
+              <CardTitle className="font-display text-base font-semibold">Categories</CardTitle>
             </CardHeader>
-            <CardContent className="p-2 space-y-2">
+            <CardContent className="p-4 space-y-2">
               <div className="flex flex-wrap gap-1 min-h-[1.5rem]">
                 {formData.category.length > 0 ? (
                   formData.category.map((cat, index) => (
                     <Badge
                       key={index}
                       variant="secondary"
-                      className="text-[0.625rem] h-5"
+                      className="text-xs h-5"
                     >
                       {cat}
                       {!isDisabled && (
@@ -591,7 +590,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                           onClick={() => handleRemoveCategory(index)}
                           className="ml-1 hover:text-destructive"
                         >
-                          <X className="h-2.5 w-2.5" />
+                          <X className="h-3.5 w-3.5" />
                         </button>
                       )}
                     </Badge>
@@ -614,7 +613,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                       }))
                     }
                     onKeyDown={(e) => handleKeyDown(e, handleAddCategory)}
-                    className="text-xs h-7"
+                    className="text-sm h-8"
                     placeholder="Add category"
                   />
                   <Button
@@ -624,7 +623,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                     className="h-7 px-2 text-xs"
                     disabled={!formData.newCategory.trim()}
                   >
-                    <Plus className="h-2.5 w-2.5" />
+                    <Plus className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               )}
@@ -632,31 +631,31 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
           </Card>
 
           {/* Questions */}
-          <Card className="border p-2 gap-0">
-            <CardHeader className="p-1 pb-1">
+          <Card className="shadow-luxury">
+            <CardHeader className="p-4 pb-2">
               <div className="flex justify-between items-center">
-                <CardTitle className="text-sm font-medium flex items-center gap-1">
+                <CardTitle className="font-display text-base font-semibold flex items-center gap-1">
                   <MessageSquare className="h-3 w-3" />
                   Review Questions
-                  <Badge variant="outline" className="text-[0.625rem] ml-1">
+                  <Badge variant="outline" className="text-xs ml-1">
                     {formData.questions.length}/5
                   </Badge>
                 </CardTitle>
                 {maxQuestionsReached && !isViewMode && (
-                  <Alert className="p-1 border-orange-200 bg-orange-50">
-                    <AlertCircle className="h-2.5 w-2.5 text-orange-600" />
-                    <span className="text-[0.625rem] text-orange-600 ml-1">
+                  <Alert className="border-gold/30 bg-[var(--accent)] p-1.5">
+                    <AlertCircle className="h-3 w-3 text-gold" />
+                    <span className="text-xs text-gold">
                       Max 5 questions
                     </span>
                   </Alert>
                 )}
               </div>
             </CardHeader>
-            <CardContent className="p-2 space-y-2">
+            <CardContent className="p-4 space-y-2">
               {formData.questions.length > 0 ? (
                 formData.questions.map((q, index) => (
-                  <Card key={index} className="border">
-                    <CardContent className="p-2 space-y-1">
+                  <Card key={index} className="border-border bg-black/20">
+                    <CardContent className="p-4 space-y-1">
                       <div className="flex justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-1">
@@ -672,10 +671,10 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                                   handleUpdateQuestion(
                                     index,
                                     "question_text",
-                                    e.target.value,
+                                    e.target.value
                                   )
                                 }
-                                className="text-xs h-6 border-0 p-0 focus-visible:ring-0"
+                                className="text-sm h-7 border-0 p-0 focus-visible:ring-0"
                                 placeholder="Question"
                               />
                             )}
@@ -683,12 +682,12 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
 
                           <div className="grid grid-cols-2 gap-1 mt-1">
                             <div>
-                              <Label className="text-[0.625rem]">
+                              <Label className="text-xs">
                                 Max Rating (1-10)
                               </Label>
                               {isViewMode ? (
                                 <div className="text-xs flex items-center gap-1">
-                                  <Star className="h-2.5 w-2.5 fill-yellow-400" />
+                                  <Star className="h-3.5 w-3.5 fill-gold" />
                                   {q.max_rating}
                                 </div>
                               ) : (
@@ -699,10 +698,10 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                                     handleUpdateQuestion(
                                       index,
                                       "max_rating",
-                                      e.target.value,
+                                      e.target.value
                                     )
                                   }
-                                  className="text-xs h-6"
+                                  className="text-sm h-7"
                                   min="1"
                                   max="10"
                                 />
@@ -710,7 +709,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                             </div>
 
                             <div>
-                              <Label className="text-[0.625rem]">Status</Label>
+                              <Label className="text-xs">Status</Label>
                               {isViewMode ? (
                                 <div className="text-xs">
                                   {q.is_active ? "Active" : "Inactive"}
@@ -723,7 +722,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                                       handleUpdateQuestion(
                                         index,
                                         "is_active",
-                                        checked,
+                                        checked
                                       )
                                     }
                                     className="scale-75"
@@ -737,8 +736,8 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                           </div>
 
                           <div className="mt-1">
-                            <Label className="text-[0.625rem] flex items-center gap-1">
-                              <Info className="h-2.5 w-2.5" />
+                            <Label className="text-xs flex items-center gap-1">
+                              <Info className="h-3.5 w-3.5" />
                               Information (Required)
                             </Label>
                             {isViewMode ? (
@@ -752,10 +751,10 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                                   handleUpdateQuestion(
                                     index,
                                     "info",
-                                    e.target.value,
+                                    e.target.value
                                   )
                                 }
-                                className="text-xs h-6"
+                                className="text-sm h-7"
                                 placeholder="Required information"
                               />
                             )}
@@ -768,9 +767,9 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                             variant="ghost"
                             size="sm"
                             onClick={() => handleRemoveQuestion(index)}
-                            className="h-6 w-6 p-0 ml-1"
+                            className="h-7 w-7 p-0 ml-1"
                           >
-                            <Trash2 className="h-2.5 w-2.5" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         )}
                       </div>
@@ -787,8 +786,8 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
               )}
 
               {!isDisabled && !maxQuestionsReached && (
-                <Card className="border-dashed p-1 gap-0">
-                  <CardContent className="p-2 space-y-1">
+                <Card className="border-dashed border-gold/40 p-3 gap-0">
+                  <CardContent className="p-4 space-y-1">
                     <div>
                       <Label className="text-xs">New Question</Label>
                       <Input
@@ -803,14 +802,14 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                           }))
                         }
                         onKeyDown={(e) => handleKeyDown(e, handleAddQuestion)}
-                        className="text-xs h-7"
+                        className="text-sm h-8"
                         placeholder="Enter question"
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-1">
                       <div>
-                        <Label className="text-[0.625rem]">Max Rating</Label>
+                        <Label className="text-xs">Max Rating</Label>
                         <Input
                           type="number"
                           value={formData.newQuestion.max_rating}
@@ -823,14 +822,14 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                               },
                             }))
                           }
-                          className="text-xs h-6"
+                          className="text-sm h-7"
                           min="1"
                           max="10"
                         />
                       </div>
 
                       <div>
-                        <Label className="text-[0.625rem]">Information</Label>
+                        <Label className="text-xs">Information</Label>
                         <Input
                           value={formData.newQuestion.info}
                           onChange={(e) =>
@@ -842,7 +841,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                               },
                             }))
                           }
-                          className="text-xs h-6"
+                          className="text-sm h-7"
                           placeholder="Required"
                         />
                       </div>
@@ -858,7 +857,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                         !formData.newQuestion.info.trim()
                       }
                     >
-                      <Plus className="h-2.5 w-2.5 mr-1" />
+                      <Plus className="h-3.5 w-3.5 mr-1" />
                       Add Question ({formData.questions.length}/5)
                     </Button>
                   </CardContent>
@@ -869,24 +868,24 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
 
           {/* Analytics */}
           {isViewMode && (
-            <Card className="border p-2 gap-0">
-              <CardHeader className="p-1 pb-1">
-                <CardTitle className="text-sm font-medium">Analytics</CardTitle>
+            <Card className="shadow-luxury">
+              <CardHeader className="p-4 pb-2">
+                <CardTitle className="font-display text-base font-semibold">Analytics</CardTitle>
               </CardHeader>
-              <CardContent className="p-2">
+              <CardContent className="p-4">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <Label className="text-xs">Total Reviews</Label>
-                    <div className="text-xs p-1 border rounded bg-muted min-h-[1.75rem] flex items-center justify-center font-medium">
+                    <div className="text-sm p-1 border-border rounded-lg bg-black/20 min-h-[1.75rem] flex items-center justify-center font-medium">
                       {formData.total_reviews || 0}
                     </div>
                   </div>
 
                   <div>
                     <Label className="text-xs">Average Rating</Label>
-                    <div className="text-xs p-1 border rounded bg-muted min-h-[1.75rem] flex items-center justify-center font-medium">
+                    <div className="text-sm p-1 border-border rounded-lg bg-black/20 min-h-[1.75rem] flex items-center justify-center font-medium">
                       {formData.average_rating?.toFixed(2) || "0.00"}
-                      <Star className="h-2.5 w-2.5 ml-0.5 fill-yellow-400" />
+                      <Star className="h-3.5 w-3.5 ml-0.5 fill-gold" />
                     </div>
                   </div>
                 </div>
@@ -896,14 +895,14 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
 
           {/* Feedback URL */}
           {!isCreateMode && (
-            <Card className="border p-2 gap-0">
-              <CardHeader className="p-1 pb-1">
-                <CardTitle className="text-sm font-medium flex items-center gap-1">
+            <Card className="shadow-luxury">
+              <CardHeader className="p-4 pb-2">
+                <CardTitle className="font-display text-base font-semibold flex items-center gap-1">
                   <MessageSquare className="h-3 w-3" />
                   Feedback Collection
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-2">
+              <CardContent className="p-4">
                 <Tabs defaultValue="url" className="w-full">
                   <TabsList className="grid w-full grid-cols-2 h-7 mb-3">
                     <TabsTrigger value="url" className="text-xs">
@@ -922,23 +921,23 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                         <Input
                           value={getFeedbackUrl(initialData?._id)}
                           readOnly
-                          className="text-xs h-7 pr-16"
+                          className="text-sm h-8 pr-16"
                         />
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="absolute right-0.5 top-0.5 h-6 text-[0.625rem]"
+                          className="absolute right-0.5 top-0.5 h-6 text-xs"
                           onClick={() => {
                             navigator.clipboard.writeText(
-                              getFeedbackUrl(initialData?._id),
+                              getFeedbackUrl(initialData?._id)
                             );
                           }}
                         >
                           Copy
                         </Button>
                       </div>
-                      <p className="text-[0.625rem] text-muted-foreground mt-0.5">
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         Share this URL to collect feedback
                       </p>
                     </div>
@@ -949,11 +948,11 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="h-6 text-[0.625rem] px-2"
+                          className="h-6 text-xs px-2"
                           onClick={() =>
                             window.open(
                               getFeedbackUrl(initialData?._id),
-                              "_blank",
+                              "_blank"
                             )
                           }
                         >
@@ -963,10 +962,10 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="h-6 text-[0.625rem] px-2"
+                          className="h-6 text-xs px-2"
                           onClick={() => {
                             navigator.clipboard.writeText(
-                              getFeedbackUrl(initialData?._id),
+                              getFeedbackUrl(initialData?._id)
                             );
                           }}
                         >
@@ -975,10 +974,10 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                       </div>
 
                       <div className="space-y-1">
-                        <p className="text-[0.625rem] text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                           <strong>URL Usage Tips:</strong>
                         </p>
-                        <ul className="text-[0.5rem] text-muted-foreground space-y-0.5">
+                        <ul className="text-xs text-muted-foreground space-y-0.5">
                           <li>
                             • Share via email, messaging apps, or social media
                           </li>
@@ -1006,7 +1005,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                           fgColor="#000000"
                         />
                       </div>
-                      <p className="text-[0.5rem] text-muted-foreground text-center">
+                      <p className="text-xs text-muted-foreground text-center">
                         Scan this QR code with any smartphone camera
                       </p>
                     </div>
@@ -1017,11 +1016,11 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="h-6 text-[0.625rem] px-2"
+                          className="h-6 text-xs px-2"
                           onClick={() =>
                             downloadQRCode(
                               formData.name || "product",
-                              initialData?._id || "product_id",
+                              initialData?._id || "product_id"
                             )
                           }
                         >
@@ -1031,10 +1030,10 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="h-6 text-[0.625rem] px-2"
+                          className="h-6 text-xs px-2"
                           onClick={() =>
                             copyQRCodeToClipboard(
-                              initialData?._id || "product_id",
+                              initialData?._id || "product_id"
                             )
                           }
                         >
@@ -1044,11 +1043,11 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="h-6 text-[0.625rem] px-2 col-span-2"
+                          className="h-6 text-xs px-2 col-span-2"
                           onClick={() =>
                             window.open(
                               getFeedbackUrl(initialData?._id),
-                              "_blank",
+                              "_blank"
                             )
                           }
                         >
@@ -1057,10 +1056,10 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
                       </div>
 
                       <div className="space-y-1">
-                        <p className="text-[0.625rem] text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                           <strong>QR Code Best Practices:</strong>
                         </p>
-                        <ul className="text-[0.5rem] text-muted-foreground space-y-0.5">
+                        <ul className="text-xs text-muted-foreground space-y-0.5">
                           <li>
                             • Print at least 2x2 inches (5x5 cm) for scanning
                           </li>
@@ -1087,7 +1086,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
         </div>
       </ScrollArea>
     );
-  },
+  }
 );
 
 ProductForm.displayName = "ProductForm";

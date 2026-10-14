@@ -14,12 +14,14 @@ interface RecentActivityProps {
 export default function RecentActivity({ reviews }: RecentActivityProps) {
   if (reviews.length === 0) {
     return (
-      <Card className="text-[10px]">
+      <Card className="shadow-luxury">
         <CardHeader className="pb-2">
-          <CardTitle className="text-[12px]">Recent Activity</CardTitle>
+          <CardTitle className="font-display text-base font-semibold">
+            Recent Activity
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-center py-4">
+          <p className="py-4 text-center text-sm text-muted-foreground">
             No recent activity
           </p>
         </CardContent>
@@ -28,26 +30,32 @@ export default function RecentActivity({ reviews }: RecentActivityProps) {
   }
 
   return (
-    <Card className="text-[10px]">
+    <Card className="shadow-luxury">
       <CardHeader className="pb-2">
-        <CardTitle className="text-[12px]">Recent Activity</CardTitle>
+        <CardTitle className="font-display text-base font-semibold">
+          Recent Activity
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
           {reviews.map((review, index) => (
             <div
               key={index}
-              className="flex items-center justify-between p-2 border rounded"
+              className="flex items-center justify-between rounded-lg border border-border bg-black/20 p-3 transition-colors hover:border-gold/35"
             >
-              <div>
-                <p className="font-medium">{review.product_code}</p>
-                <p className="text-muted-foreground">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium">
+                  {review.product_code}
+                </p>
+                <p className="truncate text-xs text-muted-foreground">
                   {review.email} • {new Date(review.date).toLocaleDateString()}
                 </p>
               </div>
-              <div className="flex items-center gap-1">
-                <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
-                <span className="font-medium">{review.rating.toFixed(1)}</span>
+              <div className="flex shrink-0 items-center gap-1.5">
+                <Star className="h-3.5 w-3.5 fill-gold text-gold" />
+                <span className="text-sm font-semibold">
+                  {review.rating.toFixed(1)}
+                </span>
               </div>
             </div>
           ))}

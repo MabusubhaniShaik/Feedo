@@ -126,7 +126,7 @@ const UserProfileForm = ({
   const isCreateMode = mode === "create";
 
   return (
-    <Card className="text-[10px]">
+    <Card className="text-[11px]">
       <CardHeader className="pb-3">
         <CardTitle className="text-[12px] font-bold">
           {isViewMode
@@ -140,11 +140,11 @@ const UserProfileForm = ({
         <form onSubmit={handleSubmit} className="space-y-3">
           {/* User ID */}
           <div className="space-y-1">
-            <Label htmlFor="user_id" className="text-[10px]">
+            <Label htmlFor="user_id" className="text-[11px]">
               User ID
             </Label>
             {isViewMode ? (
-              <div className="p-1.5 border border-gray-300 rounded-[3px] bg-gray-50 text-[10px] min-h-[28px] flex items-center">
+              <div className="p-1.5 border border-gray-300 rounded-[3px] bg-gray-50 text-[11px] min-h-[28px] flex items-center">
                 {formData.user_id}
               </div>
             ) : (
@@ -155,18 +155,18 @@ const UserProfileForm = ({
                 onChange={handleChange}
                 required
                 disabled={isEditMode}
-                className="h-7 text-[10px] rounded-[3px]"
+                className="h-7 text-[11px] rounded-[3px]"
               />
             )}
           </div>
 
           {/* Name */}
           <div className="space-y-1">
-            <Label htmlFor="name" className="text-[10px]">
+            <Label htmlFor="name" className="text-[11px]">
               Name
             </Label>
             {isViewMode ? (
-              <div className="p-1.5 border border-gray-300 rounded-[3px] bg-gray-50 text-[10px] min-h-[28px] flex items-center">
+              <div className="p-1.5 border border-gray-300 rounded-[3px] bg-gray-50 text-[11px] min-h-[28px] flex items-center">
                 {formData.name}
               </div>
             ) : (
@@ -176,18 +176,18 @@ const UserProfileForm = ({
                 value={formData.name || ""}
                 onChange={handleChange}
                 required
-                className="h-7 text-[10px] rounded-[3px]"
+                className="h-7 text-[11px] rounded-[3px]"
               />
             )}
           </div>
 
           {/* Email */}
           <div className="space-y-1">
-            <Label htmlFor="email" className="text-[10px]">
+            <Label htmlFor="email" className="text-[11px]">
               Email
             </Label>
             {isViewMode ? (
-              <div className="p-1.5 border border-gray-300 rounded-[3px] bg-gray-50 text-[10px] min-h-[28px] flex items-center">
+              <div className="p-1.5 border border-gray-300 rounded-[3px] bg-gray-50 text-[11px] min-h-[28px] flex items-center">
                 {formData.email}
               </div>
             ) : (
@@ -198,7 +198,7 @@ const UserProfileForm = ({
                 value={formData.email || ""}
                 onChange={handleChange}
                 required
-                className="h-7 text-[10px] rounded-[3px]"
+                className="h-7 text-[11px] rounded-[3px]"
               />
             )}
           </div>
@@ -207,7 +207,7 @@ const UserProfileForm = ({
           {(isCreateMode || isEditMode) && (
             <>
               <div className="space-y-1">
-                <Label htmlFor="password" className="text-[10px]">
+                <Label htmlFor="password" className="text-[11px]">
                   {isCreateMode ? "Password" : "New Password (optional)"}
                 </Label>
                 <Input
@@ -217,7 +217,7 @@ const UserProfileForm = ({
                   value={formData.password || ""}
                   onChange={handleChange}
                   required={isCreateMode}
-                  className="h-7 text-[10px] rounded-[3px]"
+                  className="h-7 text-[11px] rounded-[3px]"
                   placeholder={
                     isCreateMode ? "" : "Leave blank to keep current"
                   }
@@ -230,7 +230,7 @@ const UserProfileForm = ({
               {/* Confirm Password (only for create mode) */}
               {isCreateMode && (
                 <div className="space-y-1">
-                  <Label htmlFor="confirmPassword" className="text-[10px]">
+                  <Label htmlFor="confirmPassword" className="text-[11px]">
                     Confirm Password
                   </Label>
                   <Input
@@ -240,7 +240,7 @@ const UserProfileForm = ({
                     value={formData.confirmPassword || ""}
                     onChange={handleChange}
                     required={isCreateMode}
-                    className="h-7 text-[10px] rounded-[3px]"
+                    className="h-7 text-[11px] rounded-[3px]"
                   />
                   {errors.confirmPassword && (
                     <p className="text-[8px] text-red-500">
@@ -254,11 +254,11 @@ const UserProfileForm = ({
 
           {/* Role */}
           <div className="space-y-1">
-            <Label htmlFor="role_id" className="text-[10px]">
+            <Label htmlFor="role_id" className="text-[11px]">
               Role
             </Label>
             {isViewMode ? (
-              <div className="p-1.5 border border-gray-300 rounded-[3px] bg-gray-50 text-[10px] min-h-[28px] flex items-center">
+              <div className="p-1.5 border border-gray-300 rounded-[3px] bg-gray-50 text-[11px] min-h-[28px] flex items-center">
                 {formData.role_name}
               </div>
             ) : (
@@ -267,10 +267,10 @@ const UserProfileForm = ({
                 onValueChange={handleSelectChange}
                 required
               >
-                <SelectTrigger className="h-7 text-[10px] rounded-[3px]">
+                <SelectTrigger className="h-7 text-[11px] rounded-[3px]">
                   <SelectValue placeholder="Select Role" />
                 </SelectTrigger>
-                <SelectContent className="text-[10px]">
+                <SelectContent className="text-[11px]">
                   <SelectItem value="1">Admin</SelectItem>
                   <SelectItem value="2">User</SelectItem>
                   <SelectItem value="3">Public</SelectItem>
@@ -297,7 +297,7 @@ const UserProfileForm = ({
               />
               <Label
                 htmlFor="isEmailVerified"
-                className="text-[10px] font-normal"
+                className="text-[11px] font-normal"
               >
                 Email Verified
               </Label>
@@ -319,7 +319,7 @@ const UserProfileForm = ({
               />
               <Label
                 htmlFor="is_default_password"
-                className="text-[10px] font-normal"
+                className="text-[11px] font-normal"
               >
                 Default Password
               </Label>
@@ -339,7 +339,7 @@ const UserProfileForm = ({
                 disabled={isViewMode}
                 className="h-3 w-3 rounded-[2px]"
               />
-              <Label htmlFor="is_active" className="text-[10px] font-normal">
+              <Label htmlFor="is_active" className="text-[11px] font-normal">
                 Active
               </Label>
             </div>
@@ -354,7 +354,7 @@ const UserProfileForm = ({
                     type="button"
                     onClick={onCancel}
                     variant="outline"
-                    className="h-6 px-2 text-[10px] rounded-[3px]"
+                    className="h-6 px-2 text-[11px] rounded-[3px]"
                   >
                     Back
                   </Button>
@@ -365,7 +365,7 @@ const UserProfileForm = ({
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="h-6 px-2 text-[10px] rounded-[3px]"
+                  className="h-6 px-2 text-[11px] rounded-[3px]"
                 >
                   {loading
                     ? "Saving..."
@@ -378,7 +378,7 @@ const UserProfileForm = ({
                     type="button"
                     onClick={onCancel}
                     variant="outline"
-                    className="h-6 px-2 text-[10px] rounded-[3px]"
+                    className="h-6 px-2 text-[11px] rounded-[3px]"
                   >
                     Cancel
                   </Button>

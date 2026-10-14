@@ -73,38 +73,42 @@ export function DataDialog<T>({
         className="
     max-h-[90vh]
     overflow-y-auto
-    text-[0.875rem]
+    text-sm
     w-full
     max-w-none
     min-w-[72rem]
+    border-border
+    shadow-luxury
   "
       >
         <DialogHeader>
-          <DialogTitle className="text-[1rem]">{getModeTitle()}</DialogTitle>
-          <DialogDescription className="text-[0.75rem]">
+          <DialogTitle className="font-display text-lg font-semibold">
+            {getModeTitle()}
+          </DialogTitle>
+          <DialogDescription className="text-xs">
             {mode === "view"
               ? "View details"
               : mode === "create"
-              ? "Add new record"
-              : "Edit existing record"}
+                ? "Add new record"
+                : "Edit existing record"}
           </DialogDescription>
         </DialogHeader>
 
         <div className="py-4">{children}</div>
 
         {(mode === "create" || mode === "edit") && onSubmit && (
-          <div className="flex justify-end gap-2 pt-4 border-t">
+          <div className="flex justify-end gap-3 border-t border-border pt-4">
             <Button
               variant="outline"
               onClick={onClose}
-              className="text-[0.75rem] h-8"
+              className="h-9 border-gold/40 px-4 text-gold hover:bg-[var(--accent)] hover:text-gold-soft"
             >
               Cancel
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={loading}
-              className="text-[0.75rem] h-8"
+              className="h-9 px-5"
             >
               {loading ? "Processing..." : getSubmitButtonLabel()}
             </Button>

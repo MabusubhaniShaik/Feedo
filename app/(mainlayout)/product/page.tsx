@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { apiService } from "@/helpers/api.service";
 import { DataTable } from "@/components/common/DataTable";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -27,6 +27,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { RefreshCw, PackagePlus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface Product {
   _id: string;
@@ -152,7 +153,7 @@ const ProductPage = () => {
       setProductToDelete(null);
     } catch (error) {
       console.error("Error deleting product:", error);
-      alert("Failed to delete product");
+      toast.error("Failed to delete product");
     } finally {
       setIsDeleting(false);
     }
@@ -280,7 +281,7 @@ const ProductPage = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6 text-red-600 hover:text-red-700 hover:bg-red-50"
+            className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
             onClick={(e) => handleDeleteClick(product, e)}
           >
             <Trash2 className="h-3 w-3" />
@@ -291,40 +292,46 @@ const ProductPage = () => {
   ];
 
   return (
-    <div className="container mx-auto p-4">
-      <Card className="text-[0.75rem]">
-        <CardHeader className="pb-2">
-          <div className="flex justify-between items-center">
-            <CardTitle className="text-[0.875rem]">Products</CardTitle>
-            <div className="flex gap-1">
-              <Button
-                onClick={handleCreate}
-                size="sm"
-                className="text-[0.75rem] h-6 px-2 rounded-[3px]"
-              >
-                <PackagePlus className="h-3 w-3 mr-1" />
-                Add
-              </Button>
-              <Button
-                onClick={fetchProducts}
-                variant="outline"
-                size="sm"
-                className="text-[0.75rem] h-6 px-2 rounded-[3px]"
-              >
-                <RefreshCw className="h-3 w-3 mr-1" />
-                Refresh
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
+    <div className="mx-auto max-w-7xl space-y-6">
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-gold">
+            Catalog
+          </p>
+          <h1 className="mt-1 text-4xl font-semibold tracking-tight text-foreground">
+            Products
+          </h1>
+          <div className="mt-3 h-px w-24 gold-rule" />
+          <p className="mt-3 text-sm text-muted-foreground">
+            Manage your products and their feedback questions
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            onClick={fetchProducts}
+            variant="outline"
+            size="sm"
+            className="border-gold/40 text-gold hover:bg-[var(--accent)] hover:text-gold-soft"
+          >
+            <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+            Refresh
+          </Button>
+          <Button onClick={handleCreate} size="sm" className="font-medium">
+            <PackagePlus className="mr-1.5 h-3.5 w-3.5" />
+            Add Product
+          </Button>
+        </div>
+      </div>
+
+      <Card className="shadow-luxury">
+        <CardContent className="pt-6">
           <DataTable
             data={products}
             columns={columns}
             loading={loading}
             emptyMessage="No products found"
             onRowClick={handleRowClick}
-            className="[&_tr]:cursor-pointer [&_tr:hover]:bg-muted/50"
+            className="[&_tr]:cursor-pointer [&_tr:hover]:bg-[var(--accent)] [&_tr]:transition-colors"
           />
 
           {/* Pagination */}
@@ -380,29 +387,27 @@ const ProductPage = () => {
 
       {/* Delete Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="text-[0.75rem] max-w-md">
+        <AlertDialogContent className="max-w-md shadow-luxury">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[0.875rem]">
+            <AlertDialogTitle className="font-display text-lg">
               Delete Product
             </AlertDialogTitle>
             <AlertDialogDescription>
               Delete{" "}
-              <span className="font-medium">{productToDelete?.name}</span>? This
-              cannot be undone.
+              <span className="font-medium text-foreground">
+                {productToDelete?.name}
+              </span>
+              ? This cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={handleDeleteCancel}
-              disabled={isDeleting}
-              className="text-[0.75rem]"
-            >
+            <AlertDialogCancel onClick={handleDeleteCancel} disabled={isDeleting}>
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               disabled={isDeleting}
-              className="bg-red-600 hover:bg-red-700 text-[0.75rem]"
+              className="bg-destructive text-white hover:bg-destructive/90"
             >
               {isDeleting ? "Deleting..." : "Delete"}
             </AlertDialogAction>

@@ -153,7 +153,7 @@ export const UserForm = forwardRef<UserFormRef, UserFormProps>(
     const isDisabled = isViewMode || loading;
 
     const getPasswordStrengthColor = () => {
-      if (passwordStrength === 0) return "bg-gray-200";
+      if (passwordStrength === 0) return "bg-white/10";
       if (passwordStrength === 1) return "bg-red-500";
       if (passwordStrength === 2) return "bg-yellow-500";
       if (passwordStrength === 3) return "bg-blue-500";
@@ -161,25 +161,25 @@ export const UserForm = forwardRef<UserFormRef, UserFormProps>(
     };
 
     return (
-      <div className="space-y-6 text-[0.875rem]">
+      <div className="space-y-6 text-sm">
         {/* Basic Information Section */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-gray-500" />
-            <h3 className="text-[0.875rem] font-medium">Basic Information</h3>
+            <User className="h-4 w-4 text-gold" />
+            <h3 className="font-display text-sm font-semibold">Basic Information</h3>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label
                 htmlFor="user_id"
-                className="text-[0.75rem] flex items-center gap-1"
+                className="text-sm flex items-center gap-1"
               >
                 <User className="h-3 w-3" />
                 User ID
               </Label>
               {isViewMode ? (
-                <div className="text-[0.75rem] p-2 border rounded-md bg-gray-50 min-h-[2rem]">
+                <div className="flex min-h-9 items-center rounded-lg border border-border bg-black/20 px-3 text-sm">
                   {formData.user_id || "-"}
                 </div>
               ) : (
@@ -189,18 +189,18 @@ export const UserForm = forwardRef<UserFormRef, UserFormProps>(
                   value={formData.user_id}
                   onChange={handleInputChange}
                   disabled={isDisabled}
-                  className="text-[0.75rem] h-8"
+                  className="text-sm h-9"
                   placeholder="Enter user ID"
                 />
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-[0.75rem]">
+              <Label htmlFor="name" className="text-sm">
                 Full Name
               </Label>
               {isViewMode ? (
-                <div className="text-[0.75rem] p-2 border rounded-md bg-gray-50 min-h-[2rem]">
+                <div className="flex min-h-9 items-center rounded-lg border border-border bg-black/20 px-3 text-sm">
                   {formData.name || "-"}
                 </div>
               ) : (
@@ -210,7 +210,7 @@ export const UserForm = forwardRef<UserFormRef, UserFormProps>(
                   value={formData.name}
                   onChange={handleInputChange}
                   disabled={isDisabled}
-                  className="text-[0.75rem] h-8"
+                  className="text-sm h-9"
                   placeholder="Enter full name"
                 />
               )}
@@ -220,13 +220,13 @@ export const UserForm = forwardRef<UserFormRef, UserFormProps>(
           <div className="space-y-2">
             <Label
               htmlFor="email"
-              className="text-[0.75rem] flex items-center gap-1"
+              className="text-sm flex items-center gap-1"
             >
               <Mail className="h-3 w-3" />
               Email Address
             </Label>
             {isViewMode ? (
-              <div className="text-[0.75rem] p-2 border rounded-md bg-gray-50 min-h-[2rem]">
+              <div className="flex min-h-9 items-center rounded-lg border border-border bg-black/20 px-3 text-sm">
                 {formData.email || "-"}
               </div>
             ) : (
@@ -237,7 +237,7 @@ export const UserForm = forwardRef<UserFormRef, UserFormProps>(
                 value={formData.email}
                 onChange={handleInputChange}
                 disabled={isDisabled}
-                className="text-[0.75rem] h-8"
+                className="text-sm h-9"
                 placeholder="Enter email address"
               />
             )}
@@ -247,13 +247,13 @@ export const UserForm = forwardRef<UserFormRef, UserFormProps>(
         {/* Security Section */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <Lock className="h-4 w-4 text-gray-500" />
-            <h3 className="text-[0.875rem] font-medium">Security</h3>
+            <Lock className="h-4 w-4 text-gold" />
+            <h3 className="font-display text-sm font-semibold">Security</h3>
           </div>
 
           {(mode === "create" || (mode === "edit" && !isViewMode)) && (
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-[0.75rem]">
+              <Label htmlFor="password" className="text-sm">
                 Password
               </Label>
               <div className="relative">
@@ -264,7 +264,7 @@ export const UserForm = forwardRef<UserFormRef, UserFormProps>(
                   value={formData.password}
                   onChange={handleInputChange}
                   disabled={isDisabled}
-                  className="text-[0.75rem] h-8 pr-10"
+                  className="text-sm h-9 pr-10"
                   placeholder={
                     mode === "edit"
                       ? "Leave blank to keep current password"
@@ -277,20 +277,20 @@ export const UserForm = forwardRef<UserFormRef, UserFormProps>(
                   className="absolute right-2 top-1/2 transform -translate-y-1/2"
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-500" />
+                    <EyeOff className="h-4 w-4 text-gold" />
                   ) : (
-                    <Eye className="h-4 w-4 text-gray-500" />
+                    <Eye className="h-4 w-4 text-gold" />
                   )}
                 </button>
               </div>
 
               {formData.password && (
                 <div className="mt-2 space-y-1">
-                  <div className="flex justify-between text-[0.7rem]">
+                  <div className="flex justify-between text-xs">
                     <span>Password Strength:</span>
                     <span
                       className={`
-                      ${passwordStrength === 0 ? "text-gray-500" : ""}
+                      ${passwordStrength === 0 ? "text-muted-foreground" : ""}
                       ${passwordStrength === 1 ? "text-red-500" : ""}
                       ${passwordStrength === 2 ? "text-yellow-500" : ""}
                       ${passwordStrength === 3 ? "text-blue-500" : ""}
@@ -304,13 +304,13 @@ export const UserForm = forwardRef<UserFormRef, UserFormProps>(
                       {passwordStrength === 4 && "Strong"}
                     </span>
                   </div>
-                  <div className="h-1 w-full bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
                     <div
                       className={`h-full ${getPasswordStrengthColor()} transition-all duration-300`}
                       style={{ width: `${passwordStrength * 25}%` }}
                     />
                   </div>
-                  <p className="text-[0.7rem] text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     Use at least 8 characters with uppercase, lowercase,
                     numbers, and symbols
                   </p>
@@ -323,18 +323,18 @@ export const UserForm = forwardRef<UserFormRef, UserFormProps>(
             <div className="space-y-2">
               <Label
                 htmlFor="role_id"
-                className="text-[0.75rem] flex items-center gap-1"
+                className="text-sm flex items-center gap-1"
               >
                 <Shield className="h-3 w-3" />
                 Role
               </Label>
               {isViewMode ? (
-                <div className="text-[0.75rem] p-2 border rounded-md bg-gray-50 min-h-[2rem]">
+                <div className="flex min-h-9 items-center rounded-lg border border-border bg-black/20 px-3 text-sm">
                   <Badge
                     variant={
                       formData.role_name === "Admin" ? "default" : "secondary"
                     }
-                    className="text-[0.625rem]"
+                    className="text-xs"
                   >
                     {formData.role_name}
                   </Badge>
@@ -347,14 +347,14 @@ export const UserForm = forwardRef<UserFormRef, UserFormProps>(
                   }
                   disabled={isDisabled}
                 >
-                  <SelectTrigger className="text-[0.75rem] h-8">
+                  <SelectTrigger className="text-sm h-9">
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="admin" className="text-[0.75rem]">
+                    <SelectItem value="admin" className="text-sm">
                       Admin
                     </SelectItem>
-                    <SelectItem value="user" className="text-[0.75rem]">
+                    <SelectItem value="user" className="text-sm">
                       User
                     </SelectItem>
                   </SelectContent>
@@ -363,14 +363,14 @@ export const UserForm = forwardRef<UserFormRef, UserFormProps>(
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="status" className="text-[0.75rem]">
+              <Label htmlFor="status" className="text-sm">
                 Status
               </Label>
               {isViewMode ? (
-                <div className="text-[0.75rem] p-2 border rounded-md bg-gray-50 min-h-[2rem]">
+                <div className="flex min-h-9 items-center rounded-lg border border-border bg-black/20 px-3 text-sm">
                   <Badge
                     variant={formData.is_active ? "default" : "destructive"}
-                    className="text-[0.625rem]"
+                    className="text-xs"
                   >
                     {formData.is_active ? "Active" : "Inactive"}
                   </Badge>
@@ -384,7 +384,7 @@ export const UserForm = forwardRef<UserFormRef, UserFormProps>(
                     }
                     disabled={isDisabled}
                   />
-                  <span className="text-[0.75rem]">
+                  <span className="text-sm">
                     {formData.is_active ? "Active" : "Inactive"}
                   </span>
                 </div>
@@ -396,18 +396,18 @@ export const UserForm = forwardRef<UserFormRef, UserFormProps>(
         {/* Account Settings Section */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <Shield className="h-4 w-4 text-gray-500" />
-            <h3 className="text-[0.875rem] font-medium">Account Settings</h3>
+            <Shield className="h-4 w-4 text-gold" />
+            <h3 className="font-display text-sm font-semibold">Account Settings</h3>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-[0.75rem]">Email Verification</Label>
+              <Label className="text-sm">Email Verification</Label>
               {isViewMode ? (
-                <div className="text-[0.75rem] p-2 border rounded-md bg-gray-50 min-h-[2rem]">
+                <div className="flex min-h-9 items-center rounded-lg border border-border bg-black/20 px-3 text-sm">
                   <Badge
                     variant={formData.isEmailVerified ? "default" : "secondary"}
-                    className="text-[0.625rem]"
+                    className="text-xs"
                   >
                     {formData.isEmailVerified ? "Verified" : "Not Verified"}
                   </Badge>
@@ -421,7 +421,7 @@ export const UserForm = forwardRef<UserFormRef, UserFormProps>(
                     }
                     disabled={isDisabled}
                   />
-                  <span className="text-[0.75rem]">
+                  <span className="text-sm">
                     {formData.isEmailVerified ? "Verified" : "Not Verified"}
                   </span>
                 </div>
@@ -430,13 +430,13 @@ export const UserForm = forwardRef<UserFormRef, UserFormProps>(
 
             {isViewMode && (
               <div className="space-y-2">
-                <Label className="text-[0.75rem]">Password Status</Label>
-                <div className="text-[0.75rem] p-2 border rounded-md bg-gray-50 min-h-[2rem]">
+                <Label className="text-sm">Password Status</Label>
+                <div className="flex min-h-9 items-center rounded-lg border border-border bg-black/20 px-3 text-sm">
                   <Badge
                     variant={
                       formData.is_default_password ? "secondary" : "default"
                     }
-                    className="text-[0.625rem]"
+                    className="text-xs"
                   >
                     {formData.is_default_password
                       ? "Default Password"
@@ -448,11 +448,11 @@ export const UserForm = forwardRef<UserFormRef, UserFormProps>(
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="image_url" className="text-[0.75rem]">
+            <Label htmlFor="image_url" className="text-sm">
               Profile Image URL
             </Label>
             {isViewMode ? (
-              <div className="text-[0.75rem] p-2 border rounded-md bg-gray-50 min-h-[2rem]">
+              <div className="flex min-h-9 items-center rounded-lg border border-border bg-black/20 px-3 text-sm">
                 {formData.image_url || "No image URL provided"}
               </div>
             ) : (
@@ -462,7 +462,7 @@ export const UserForm = forwardRef<UserFormRef, UserFormProps>(
                 value={formData.image_url}
                 onChange={handleInputChange}
                 disabled={isDisabled}
-                className="text-[0.75rem] h-8"
+                className="text-sm h-9"
                 placeholder="Enter image URL (optional)"
               />
             )}

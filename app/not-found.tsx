@@ -5,15 +5,23 @@ import { Home, ShieldAlert } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full text-center space-y-6">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
+      <div className="w-full max-w-md space-y-6 text-center">
         <div className="flex flex-col items-center">
-          <ShieldAlert className="h-16 w-16 text-red-500 mb-4" />
-          <h1 className="text-4xl font-bold text-gray-900">Access Denied</h1>
-          <p className="text-gray-600 mt-2">
-            You don't have permission to access this page.
+          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-gold/40 bg-[var(--accent)]">
+            <ShieldAlert className="h-9 w-9 text-gold" />
+          </div>
+          <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-gold">
+            403 · Restricted
           </p>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="gold-text mb-2 mt-3 text-4xl font-semibold tracking-tight">
+            Access Denied
+          </h1>
+          <div className="gold-rule mb-4 h-px w-32" />
+          <p className="text-sm text-muted-foreground">
+            You don&apos;t have permission to access this page.
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
             This page is restricted to Admin users only.
           </p>
         </div>
@@ -25,13 +33,17 @@ export default function NotFound() {
               Go to Dashboard
             </Link>
           </Button>
-          <Button variant="outline" asChild className="w-full">
+          <Button
+            variant="outline"
+            asChild
+            className="w-full border-gold/40 text-gold hover:bg-[var(--accent)] hover:text-gold-soft"
+          >
             <Link href="/signin?action=logout">Switch Account</Link>
           </Button>
         </div>
 
-        <div className="pt-6 border-t">
-          <p className="text-xs text-gray-500">
+        <div className="border-t border-border pt-6">
+          <p className="text-xs text-muted-foreground">
             If you believe this is an error, please contact your system
             administrator.
           </p>

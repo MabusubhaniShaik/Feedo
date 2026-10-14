@@ -222,29 +222,30 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex items-center justify-between mb-6">
+    <div className="mx-auto max-w-7xl space-y-6">
+      <div className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-[12px] font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground mt-1 text-[10px]">
+          <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-gold">
+            Overview
+          </p>
+          <h1 className="mt-1 text-4xl font-semibold tracking-tight text-foreground">
+            Dashboard
+          </h1>
+          <div className="mt-3 h-px w-24 gold-rule" />
+          <p className="mt-3 text-sm text-muted-foreground">
             Comprehensive overview of your products and reviews
           </p>
         </div>
-        <div className="flex gap-1">
+        <div className="flex gap-2">
           <Button
             onClick={fetchAllStatistics}
             variant="outline"
             size="sm"
-            className="h-6 px-2 text-[10px] rounded-[3px]"
+            className="border-gold/40 text-gold hover:bg-[var(--accent)] hover:text-gold-soft"
           >
             Refresh All
           </Button>
-          <Button
-            onClick={handleExport}
-            size="sm"
-            className="h-6 px-2 text-[10px] rounded-[3px]"
-            disabled
-          >
+          <Button onClick={handleExport} size="sm" className="font-medium">
             Export CSV
           </Button>
         </div>

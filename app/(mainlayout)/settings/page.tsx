@@ -1,11 +1,10 @@
-import React from 'react'
+import { ComingSoon } from "@/components/common/ComingSoon";
 
-const page = () => {
-  return (
-    <div>
-      Settings Page
-    </div>
-  )
-}
+const SettingsPage = () => (
+  <ComingSoon
+    title="Settings"
+    subtitle="Workspace preferences, branding and integrations are on the way."
+  />
+);
 
-export default page
+export default SettingsPage;

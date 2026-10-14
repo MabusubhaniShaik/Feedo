@@ -1,4 +1,11 @@
-import { Home, Users, Settings, FileText, User } from "lucide-react";
+import {
+  Home,
+  Users,
+  Settings,
+  Package,
+  Star,
+  User,
+} from "lucide-react";
 
 export interface MenuItem {
   href: string;
@@ -18,13 +25,13 @@ export const menuItems: MenuItem[] = [
   {
     href: "/product",
     label: "Product",
-    icon: FileText,
+    icon: Package,
     roles: ["Admin", "User"],
   },
   {
     href: "/review",
     label: "Review",
-    icon: FileText,
+    icon: Star,
     roles: ["Admin", "User"],
   },
   {

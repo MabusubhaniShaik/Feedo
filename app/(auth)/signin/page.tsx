@@ -23,7 +23,7 @@ import {
   User as UserIcon,
   Shield,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/helpers/api.service";
 import { toast } from "sonner";
@@ -89,7 +89,6 @@ const SignInPage = () => {
     password: "",
   });
 
-  // Check if demo account section should be shown
   const isDemoAccount = searchParams.get("isDemoAccount") === "true";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -156,20 +155,17 @@ const SignInPage = () => {
         "/auth/token",
         formData,
         {},
-        { requiresAuth: false },
+        { requiresAuth: false }
       );
 
       if (response) {
-        const tokenData: any = response;
+        const tokenData = response as unknown as TokenResponse;
         const userInfo = decodeToken(tokenData.access_token);
 
-        console.log("::::tokenData", tokenData);
         if (userInfo) {
-          // Calculate token expiration timestamp
           const issuedAt = Math.floor(Date.now() / 1000);
           const expiresAt = issuedAt + tokenData.expires_in;
 
-          // Store authentication data
           sessionStorage.setItem("access_token", tokenData.access_token);
           sessionStorage.setItem("refresh_token", tokenData.refresh_token);
           sessionStorage.setItem("token_type", tokenData.token_type);
@@ -177,7 +173,6 @@ const SignInPage = () => {
           sessionStorage.setItem("issued_at", issuedAt.toString());
           sessionStorage.setItem("expires_at", expiresAt.toString());
 
-          // Store user information
           sessionStorage.setItem("user_id", userInfo.user_id);
           sessionStorage.setItem("user_name", userInfo.name);
           sessionStorage.setItem("user_email", userInfo.email);
@@ -185,7 +180,7 @@ const SignInPage = () => {
           sessionStorage.setItem("user_role_id", userInfo.role_id);
           sessionStorage.setItem(
             "user_is_default_password",
-            userInfo.is_default_password.toString(),
+            userInfo.is_default_password.toString()
           );
           sessionStorage.setItem("user_info", JSON.stringify(userInfo));
 
@@ -195,97 +190,81 @@ const SignInPage = () => {
           throw new Error("Failed to decode user information");
         }
       } else {
-        throw new Error(response || "Login failed");
+        throw new Error("Login failed");
       }
-    } catch (err: any) {
-      toast.error(err.message || "Invalid credentials");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Invalid credentials");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-md border border-gray-200 shadow-sm">
+    <div className="flex min-h-screen items-center justify-center p-4">
+      <Card className="w-full max-w-md border-border shadow-luxury">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle
-            className="text-2xl font-semibold text-black"
-            style={{ fontSize: "1.5rem" }}
-          >
+          <CardTitle className="text-3xl font-semibold text-foreground">
             Sign In
           </CardTitle>
-          <p className="text-gray-500" style={{ fontSize: "0.875rem" }}>
+          <div className="mx-auto h-px w-16 gold-rule" />
+          <p className="text-sm text-muted-foreground">
             Use your credentials to continue
           </p>
         </CardHeader>
 
         <CardContent className="space-y-5">
-          {/* Demo Info with Tooltip - Only show if isDemoAccount=true in URL */}
           {isDemoAccount && (
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div className="flex items-center justify-between rounded-xl border border-gold/25 bg-[var(--accent)] p-3">
               <div className="flex items-center gap-2">
-                <span
-                  className="font-medium text-black"
-                  style={{ fontSize: "0.75rem" }}
-                >
+                <span className="text-xs font-medium text-gold">
                   Demo Credentials
                 </span>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-5 w-5">
-                        <Info className="h-3.5 w-3.5 text-gray-400" />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5"
+                        aria-label="Demo credentials details"
+                      >
+                        <Info className="h-3.5 w-3.5 text-muted-foreground" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent
-                      className="w-80 p-4 bg-white border border-gray-200 shadow-lg"
+                      className="w-80 border-border bg-popover p-4 text-popover-foreground shadow-luxury"
                       side="top"
                       align="start"
                     >
                       <div className="space-y-3">
                         <div className="flex items-center gap-2">
-                          <Shield className="h-3.5 w-3.5 text-gray-400" />
-                          <span
-                            className="font-medium text-black"
-                            style={{ fontSize: "0.75rem" }}
-                          >
+                          <Shield className="h-3.5 w-3.5 text-gold" />
+                          <span className="text-xs font-medium">
                             Demo Credentials
                           </span>
                         </div>
 
                         <div className="space-y-2">
-                          <div className="flex items-center gap-2 pt-2 border-t">
-                            <UserIcon className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                          <div className="flex items-center gap-2 border-t border-border pt-2">
+                            <UserIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                             <div className="flex-1">
-                              <Label
-                                className="text-gray-600"
-                                style={{ fontSize: "0.75rem" }}
-                              >
+                              <Label className="text-xs text-muted-foreground">
                                 Role
                               </Label>
-                              <div
-                                className="font-medium text-black"
-                                style={{ fontSize: "0.75rem" }}
-                              >
+                              <div className="text-xs font-medium">
                                 {DEMO_CREDENTIALS.role}
                               </div>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-2">
-                            <User className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                            <User className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                             <div className="flex-1">
-                              <Label
-                                className="text-gray-600"
-                                style={{ fontSize: "0.75rem" }}
-                              >
+                              <Label className="text-xs text-muted-foreground">
                                 User ID
                               </Label>
                               <div className="flex items-center gap-2">
-                                <code
-                                  className="px-2 py-1 bg-gray-100 rounded text-black flex-1"
-                                  style={{ fontSize: "0.75rem" }}
-                                >
+                                <code className="flex-1 rounded bg-black/40 px-2 py-1 text-xs text-gold-soft">
                                   {DEMO_CREDENTIALS.userId}
                                 </code>
                                 <Button
@@ -295,10 +274,11 @@ const SignInPage = () => {
                                   onClick={() =>
                                     copyToClipboard(
                                       DEMO_CREDENTIALS.userId,
-                                      "User ID",
+                                      "User ID"
                                     )
                                   }
                                   className="h-6 w-6"
+                                  aria-label="Copy user ID"
                                 >
                                   <Copy className="h-3 w-3" />
                                 </Button>
@@ -307,19 +287,13 @@ const SignInPage = () => {
                           </div>
 
                           <div className="flex items-center gap-2">
-                            <Key className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                            <Key className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                             <div className="flex-1">
-                              <Label
-                                className="text-gray-600"
-                                style={{ fontSize: "0.75rem" }}
-                              >
+                              <Label className="text-xs text-muted-foreground">
                                 Password
                               </Label>
                               <div className="flex items-center gap-2">
-                                <code
-                                  className="px-2 py-1 bg-gray-100 rounded text-black flex-1"
-                                  style={{ fontSize: "0.75rem" }}
-                                >
+                                <code className="flex-1 rounded bg-black/40 px-2 py-1 text-xs text-gold-soft">
                                   ••••••••••
                                 </code>
                                 <Button
@@ -329,18 +303,16 @@ const SignInPage = () => {
                                   onClick={() =>
                                     copyToClipboard(
                                       DEMO_CREDENTIALS.password,
-                                      "Password",
+                                      "Password"
                                     )
                                   }
                                   className="h-6 w-6"
+                                  aria-label="Copy password"
                                 >
                                   <Copy className="h-3 w-3" />
                                 </Button>
                               </div>
-                              <div
-                                className="text-gray-500 mt-1"
-                                style={{ fontSize: "0.625rem" }}
-                              >
+                              <div className="mt-1 text-[11px] text-muted-foreground">
                                 Click copy icon to copy password
                               </div>
                             </div>
@@ -357,26 +329,20 @@ const SignInPage = () => {
                 variant="outline"
                 size="sm"
                 onClick={handleDemoLogin}
-                style={{ fontSize: "0.75rem" }}
-                className="h-7"
+                className="h-7 border-gold/40 text-xs text-gold hover:bg-[var(--accent)] hover:text-gold-soft"
               >
                 Auto-fill
               </Button>
             </div>
           )}
 
-          {/* Login Form */}
           <form onSubmit={handleSignIn} className="space-y-4">
             <div className="space-y-2">
-              <Label
-                htmlFor="user_id"
-                className="text-black"
-                style={{ fontSize: "0.75rem" }}
-              >
+              <Label htmlFor="user_id" className="text-xs text-muted-foreground">
                 User ID
               </Label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 h-3.5 w-3.5 text-gray-400 -translate-y-1/2" />
+                <User className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="user_id"
                   name="user_id"
@@ -385,21 +351,16 @@ const SignInPage = () => {
                   onChange={handleChange}
                   disabled={isLoading}
                   className="pl-10"
-                  style={{ fontSize: "0.875rem" }}
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label
-                htmlFor="password"
-                className="text-black"
-                style={{ fontSize: "0.75rem" }}
-              >
+              <Label htmlFor="password" className="text-xs text-muted-foreground">
                 Password
               </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 h-3.5 w-3.5 text-gray-400 -translate-y-1/2" />
+                <Lock className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="password"
                   name="password"
@@ -409,7 +370,6 @@ const SignInPage = () => {
                   onChange={handleChange}
                   disabled={isLoading}
                   className="pl-10 pr-10"
-                  style={{ fontSize: "0.875rem" }}
                 />
                 <Button
                   type="button"
@@ -418,6 +378,7 @@ const SignInPage = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={isLoading}
                   className="absolute right-2 top-1/2 h-5 w-5 -translate-y-1/2"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
                     <EyeOff className="h-3.5 w-3.5" />
@@ -431,12 +392,11 @@ const SignInPage = () => {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-black hover:bg-black/90"
-              style={{ fontSize: "0.875rem" }}
+              className="w-full font-medium tracking-wide shadow-luxury"
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
                   Signing in...
                 </>
               ) : (
@@ -445,28 +405,26 @@ const SignInPage = () => {
             </Button>
           </form>
 
-          {/* Sign Up Link */}
-          <div className="text-center" style={{ fontSize: "0.75rem" }}>
-            <span className="text-gray-600">Don&apos;t have an account? </span>
+          <div className="text-center text-xs">
+            <span className="text-muted-foreground">
+              Don&apos;t have an account?{" "}
+            </span>
             <Button
               type="button"
               variant="link"
               onClick={() => router.push("/signup")}
-              className="p-0 h-auto font-medium text-black"
-              style={{ fontSize: "0.75rem" }}
+              className="h-auto p-0 font-medium text-gold hover:text-gold-soft"
             >
               Sign up
             </Button>
           </div>
 
-          {/* Debug Info */}
           {formData.user_id && (
-            <div
-              className="text-center text-gray-600"
-              style={{ fontSize: "0.75rem" }}
-            >
+            <div className="text-center text-xs text-muted-foreground">
               Signing in as:{" "}
-              <span className="font-medium text-black">{formData.user_id}</span>
+              <span className="font-medium text-foreground">
+                {formData.user_id}
+              </span>
             </div>
           )}
         </CardContent>

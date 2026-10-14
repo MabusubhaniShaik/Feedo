@@ -48,8 +48,8 @@ export function DataTable<T extends { id?: string; _id?: string }>({
 
   if (data.length === 0) {
     return (
-      <div className="rounded-md border">
-        <div className="py-8 text-center text-[0.875rem] text-gray-500">
+      <div className="rounded-lg border border-border">
+        <div className="py-8 text-center text-sm text-muted-foreground">
           {emptyMessage}
         </div>
       </div>
@@ -57,14 +57,14 @@ export function DataTable<T extends { id?: string; _id?: string }>({
   }
 
   return (
-    <div className={`rounded-md border ${className}`}>
+    <div className={`overflow-hidden rounded-lg border border-border ${className}`}>
       <Table>
-        <TableHeader>
-          <TableRow>
+        <TableHeader className="bg-white/[0.03]">
+          <TableRow className="hover:bg-transparent">
             {columns.map((column) => (
               <TableHead
                 key={String(column.key)}
-                className={`text-[0.75rem] ${column.className || ""}`}
+                className={`text-[0.7rem] font-medium uppercase tracking-[0.12em] text-gold/90 ${column.className || ""}`}
               >
                 {column.header}
               </TableHead>
@@ -76,7 +76,11 @@ export function DataTable<T extends { id?: string; _id?: string }>({
             <TableRow
               key={item.id || item._id}
               onClick={() => onRowClick?.(item)}
-              className={onRowClick ? "cursor-pointer hover:bg-gray-50" : ""}
+              className={
+                onRowClick
+                  ? "cursor-pointer transition-colors hover:bg-[var(--accent)]"
+                  : ""
+              }
             >
               {columns.map((column) => (
                 <TableCell

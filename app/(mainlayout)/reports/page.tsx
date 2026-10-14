@@ -1,9 +1,10 @@
-import React from 'react'
+import { ComingSoon } from "@/components/common/ComingSoon";
 
-const page = () => {
-  return (
-    <div>Reports page</div>
-  )
-}
+const ReportsPage = () => (
+  <ComingSoon
+    title="Reports"
+    subtitle="Detailed exportable reports are on the way."
+  />
+);
 
-export default page
+export default ReportsPage;

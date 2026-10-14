@@ -26,8 +26,6 @@ export default function StatisticsTabs({
   onProductSelect,
   loading,
 }: StatisticsTabsProps) {
-  console.log(":::::: reviewAnalytics", reviewAnalytics);
-
   // Extract the data from the array if it exists
   const reviewAnalyticsData = Array.isArray(reviewAnalytics)
     ? reviewAnalytics[0]
@@ -42,28 +40,28 @@ export default function StatisticsTabs({
     : productStats;
 
   return (
-    <Tabs defaultValue="overview" className="space-y-3">
-      <TabsList className="h-8">
-        <TabsTrigger value="overview" className="text-[10px] h-6 px-2">
-          <BarChart3 className="mr-1 h-3 w-3" />
+    <Tabs defaultValue="overview" className="space-y-4">
+      <TabsList className="h-9 w-full justify-start gap-1 sm:w-auto">
+        <TabsTrigger value="overview" className="gap-1.5 px-3 text-xs">
+          <BarChart3 className="h-3.5 w-3.5" />
           Overview
         </TabsTrigger>
-        <TabsTrigger value="products" className="text-[10px] h-6 px-2">
-          <Package className="mr-1 h-3 w-3" />
+        <TabsTrigger value="products" className="gap-1.5 px-3 text-xs">
+          <Package className="h-3.5 w-3.5" />
           Top Products
         </TabsTrigger>
-        <TabsTrigger value="product-analytics" className="text-[10px] h-6 px-2">
-          <PieChart className="mr-1 h-3 w-3" />
+        <TabsTrigger value="product-analytics" className="gap-1.5 px-3 text-xs">
+          <PieChart className="h-3.5 w-3.5" />
           Product Analytics
         </TabsTrigger>
-        <TabsTrigger value="review-analytics" className="text-[10px] h-6 px-2">
-          <TrendingUp className="mr-1 h-3 w-3" />
+        <TabsTrigger value="review-analytics" className="gap-1.5 px-3 text-xs">
+          <TrendingUp className="h-3.5 w-3.5" />
           Review Analytics
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="overview" className="space-y-3">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      <TabsContent value="overview" className="space-y-4">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <RatingDistribution
             data={reviewAnalyticsData?.rating_distribution || []}
           />

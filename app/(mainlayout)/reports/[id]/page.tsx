@@ -1,5 +1,10 @@
-const page = () => {
-  return <div>Report /:ID page</div>;
-};
+import { ComingSoon } from "@/components/common/ComingSoon";
 
-export default page;
+const ReportDetailPage = () => (
+  <ComingSoon
+    title="Report"
+    subtitle="This report is being prepared."
+  />
+);
+
+export default ReportDetailPage;

@@ -16,9 +16,9 @@ import {
   Save,
   X,
   Eye,
-  BarChart3,
   Copy,
 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -101,7 +101,7 @@ export default function ProductDetailPage() {
 
   const handleSave = async () => {
     if (!id || !productFormRef.current?.validate()) {
-      alert("Please fill in all required fields");
+      toast.error("Please fill in all required fields");
       return;
     }
 
@@ -117,7 +117,7 @@ export default function ProductDetailPage() {
       fetchProduct(id);
       router.push(`/product/${id}`);
     } catch (error: any) {
-      alert(error.response?.data?.message || "Failed to save product");
+      toast.error(error.response?.data?.message || "Failed to save product");
     } finally {
       setState((prev) => ({ ...prev, saving: false }));
     }
@@ -134,12 +134,7 @@ export default function ProductDetailPage() {
     if (!id) return;
     const url = `${window.location.origin}/feedback/${id}`;
     navigator.clipboard.writeText(url);
-    alert("Feedback URL copied to clipboard!");
-  };
-
-  const handleViewReports = () => {
-    if (!id) return;
-    router.push(`/reports?product=${id}`);
+    toast.success("Feedback URL copied to clipboard!");
   };
 
   const handleViewFeedback = () => {
@@ -165,87 +160,72 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 max-w-6xl text-[0.75rem]">
+    <div className="mx-auto max-w-5xl space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
           <Button
             variant="ghost"
             onClick={handleBack}
-            className="gap-2 text-[0.75rem]"
+            className="-ml-3 mb-2 h-auto gap-1.5 p-0 text-xs text-gold hover:text-gold-soft"
             size="sm"
           >
-            <ArrowLeft className="h-3 w-3" />
+            <ArrowLeft className="h-3.5 w-3.5" />
             Back to Products
           </Button>
-
-          <div>
-            <h1 className="text-xl font-bold text-[0.875rem]">
-              {isEditMode ? "Edit Product" : state.product.name}
-            </h1>
-            <p className="text-muted-foreground text-[0.75rem]">
-              {state.product.product_code}
-            </p>
-          </div>
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+            {isEditMode ? "Edit Product" : state.product.name}
+          </h1>
+          <div className="mt-3 h-px w-24 gold-rule" />
+          <p className="mt-3 text-xs uppercase tracking-[0.2em] text-gold">
+            {state.product.product_code}
+          </p>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-2">
           {isEditMode ? (
             <>
               <Button
                 onClick={handleCancel}
                 variant="outline"
                 disabled={state.saving}
-                className="text-[0.625rem] h-6 px-2"
+                className="border-gold/40 text-gold hover:bg-[var(--accent)] hover:text-gold-soft"
                 size="sm"
               >
-                <X className="h-2.5 w-2.5 mr-0.5" />
+                <X className="mr-1.5 h-3.5 w-3.5" />
                 Cancel
               </Button>
               <Button
                 onClick={handleSave}
                 disabled={state.saving}
-                className="text-[0.625rem] h-6 px-2"
                 size="sm"
               >
-                <Save className="h-2.5 w-2.5 mr-0.5" />
+                <Save className="mr-1.5 h-3.5 w-3.5" />
                 {state.saving ? "Saving..." : "Save"}
               </Button>
             </>
           ) : (
             <>
-              <Button
-                onClick={handleToggleEdit}
-                className="text-[0.625rem] h-6 px-2 gap-1"
-                size="sm"
-              >
-                <Edit className="h-2.5 w-2.5" />
+              <Button onClick={handleToggleEdit} className="gap-1.5" size="sm">
+                <Edit className="h-3.5 w-3.5" />
                 Edit
               </Button>
               <Button
                 variant="outline"
                 onClick={handleViewFeedback}
-                className="text-[0.625rem] h-6 px-2 gap-1"
+                className="gap-1.5 border-gold/40 text-gold hover:bg-[var(--accent)] hover:text-gold-soft"
                 size="sm"
               >
-                <Eye className="h-2.5 w-2.5" />
+                <Eye className="h-3.5 w-3.5" />
                 Feedback
               </Button>
-              {/* <Button
-                variant="outline"
-                onClick={handleViewReports}
-                className="text-[0.625rem] h-6 px-2 gap-1"
-                size="sm"
-              >
-                <BarChart3 className="h-2.5 w-2.5" />
-                Reports
-              </Button> */}
               <Button
                 onClick={handleCopyFeedbackUrl}
-                className="text-[0.625rem] h-6 px-2 gap-1"
+                variant="outline"
+                className="gap-1.5"
                 size="sm"
               >
-                <Copy className="h-2.5 w-2.5" />
+                <Copy className="h-3.5 w-3.5" />
                 Copy URL
               </Button>
             </>
@@ -254,19 +234,19 @@ export default function ProductDetailPage() {
       </div>
 
       {/* Product Form */}
-      <Card className="text-[0.75rem] p-0 gap-0">
-        <CardHeader className="p-4 pb-2">
-          <CardTitle className="text-[0.875rem]">
+      <Card className="shadow-luxury">
+        <CardHeader className="pb-3">
+          <CardTitle className="font-display text-lg font-semibold">
             {isEditMode ? "Edit Product Details" : "Product Details"}
             {!isEditMode && (
-              <span className="font-normal text-muted-foreground ml-2 text-[0.75rem]">
+              <span className="ml-2 font-sans text-xs font-normal text-muted-foreground">
                 (Read-only)
               </span>
             )}
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="p-4 pt-2">
+        <CardContent>
           <ProductForm
             ref={productFormRef}
             mode={isEditMode ? "edit" : "view"}
@@ -283,7 +263,7 @@ export default function ProductDetailPage() {
 // Loading Component
 function ProductDetailLoading() {
   return (
-    <div className="container mx-auto p-4 max-w-6xl">
+    <div className="mx-auto max-w-5xl">
       <div className="flex items-center gap-3 mb-6">
         <Skeleton className="h-8 w-24" />
         <Skeleton className="h-6 w-40" />
@@ -309,12 +289,12 @@ function ProductDetailError({
   onRetry,
 }: ProductDetailErrorProps) {
   return (
-    <div className="container mx-auto p-4 max-w-6xl text-[0.75rem]">
+    <div className="mx-auto max-w-5xl text-sm">
       <div className="mb-4">
         <Button
           variant="ghost"
           onClick={onBack}
-          className="gap-2 text-[0.75rem]"
+          className="-ml-3 h-auto gap-2 p-0 text-xs text-gold hover:text-gold-soft"
           size="sm"
         >
           <ArrowLeft className="h-3 w-3" />
@@ -322,15 +302,15 @@ function ProductDetailError({
         </Button>
       </div>
 
-      <Alert variant="destructive" className="text-[0.75rem]">
-        <AlertCircle className="h-3 w-3" />
+      <Alert variant="destructive" className="border-destructive/50 shadow-luxury">
+        <AlertCircle className="h-4 w-4" />
         <div>
           <h4 className="font-medium">Error Loading Product</h4>
-          <p className="mt-1 text-[0.75rem]">{error || "Product not found"}</p>
+          <p className="mt-1 text-sm">{error || "Product not found"}</p>
         </div>
       </Alert>
 
-      <Button onClick={onRetry} className="mt-4 text-[0.75rem]" size="sm">
+      <Button onClick={onRetry} className="mt-4 h-9 px-4" size="sm">
         Try Again
       </Button>
     </div>

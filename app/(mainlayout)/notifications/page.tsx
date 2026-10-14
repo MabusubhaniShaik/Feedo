@@ -1,11 +1,10 @@
-import React from 'react'
+import { ComingSoon } from "@/components/common/ComingSoon";
 
-const page = () => {
-  return (
-    <div>
-      Notifications Page
-    </div>
-  )
-}
+const NotificationsPage = () => (
+  <ComingSoon
+    title="Notifications"
+    subtitle="Review alerts and activity digests are on the way."
+  />
+);
 
-export default page
+export default NotificationsPage;

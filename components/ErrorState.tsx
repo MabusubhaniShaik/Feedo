@@ -1,5 +1,6 @@
 // app/statistics/components/ErrorState.tsx
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 interface ErrorStateProps {
   error: string;
@@ -13,17 +14,19 @@ export default function ErrorState({
   details,
 }: ErrorStateProps) {
   return (
-    <div className="container mx-auto p-4">
-      <Card className="text-[10px] border-destructive">
-        <CardContent className="p-4">
-          <p className="text-destructive font-medium mb-2">Error</p>
-          <p className="text-muted-foreground mb-2">{error}</p>
+    <div className="mx-auto max-w-7xl">
+      <Card className="border-destructive/50 shadow-luxury">
+        <CardContent className="p-6">
+          <p className="mb-2 text-sm font-semibold text-destructive">Error</p>
+          <p className="mb-4 text-sm text-muted-foreground">{error}</p>
 
           {/* Show error details if available */}
           {details && details.length > 0 && (
-            <div className="mb-3">
-              <p className="text-destructive/80 font-medium mb-1">Details:</p>
-              <ul className="text-muted-foreground text-[9px] space-y-1 pl-4">
+            <div className="mb-4">
+              <p className="mb-1 text-xs font-medium text-destructive/80">
+                Details:
+              </p>
+              <ul className="space-y-1 pl-4 text-xs text-muted-foreground">
                 {details.map((detail, index) => (
                   <li key={index} className="list-disc">
                     {detail}
@@ -33,12 +36,9 @@ export default function ErrorState({
             </div>
           )}
 
-          <button
-            onClick={onRetry}
-            className="h-6 px-3 bg-primary text-primary-foreground rounded text-[10px] hover:bg-primary/90"
-          >
+          <Button onClick={onRetry} size="sm" className="font-medium">
             Retry
-          </button>
+          </Button>
         </CardContent>
       </Card>
     </div>

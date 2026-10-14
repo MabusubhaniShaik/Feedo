@@ -6,12 +6,11 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { apiService } from "@/helpers/api.service";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Shield, User, Key, MailCheck } from "lucide-react";
+import { toast } from "sonner";
 
 const ProfilePage = () => {
   const router = useRouter();
@@ -151,10 +150,10 @@ const ProfilePage = () => {
       // Refresh user data
       fetchUserData();
 
-      alert("Profile updated successfully");
+      toast.success("Profile updated successfully");
     } catch (error) {
       console.error("Update error:", error);
-      alert("Failed to update profile");
+      toast.error("Failed to update profile");
     } finally {
       setSaving(false);
     }
@@ -181,16 +180,18 @@ const ProfilePage = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-4">
-        <div className="text-center text-[10px]">Loading...</div>
+      <div className="mx-auto max-w-4xl">
+        <div className="text-center text-sm text-muted-foreground">
+          Loading...
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto p-4">
-        <Alert variant="destructive" className="text-[10px]">
+      <div className="mx-auto max-w-4xl">
+        <Alert variant="destructive" className="border-destructive/50 shadow-luxury">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       </div>
@@ -198,26 +199,32 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="container mx-auto p-4 space-y-3">
-      {/* Top Header with Title and Update Button */}
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <User className="h-4 w-4" />
-          <h1 className="text-[14px] font-bold">
-            {mode === "edit" ? "Edit User Profile" : "User Profile"}
+    <div className="mx-auto max-w-4xl space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-gold">
+            Account
+          </p>
+          <h1 className="mt-2 text-4xl font-semibold tracking-tight">
+            {mode === "edit" ? "Edit Profile" : "User Profile"}
+          </h1>
+          <div className="gold-rule mt-3 h-px w-24" />
+          <p className="mt-3 text-sm text-muted-foreground">
+            Your personal information and account status.
             {userData?.user_id === "USE25-002" && (
-              <span className="ml-2 text-[10px] font-normal text-amber-600 bg-amber-50 px-2 py-0.5 rounded">
+              <span className="ml-2 rounded-md border border-gold/40 bg-[var(--accent)] px-2 py-0.5 text-[11px] uppercase tracking-[0.15em] text-gold">
                 Demo Account
               </span>
             )}
-          </h1>
+          </p>
         </div>
 
         {mode === "view" ? (
           <Button
             onClick={handleEditClick}
             size="sm"
-            className="h-6 px-3 text-[10px] rounded-[3px]"
+            className="h-9 gap-1.5 px-4"
             disabled={isDemoUser}
             title={isDemoUser ? "Demo account cannot be edited" : ""}
           >
@@ -229,7 +236,7 @@ const ProfilePage = () => {
               onClick={handleSubmit}
               size="sm"
               disabled={saving || isDemoUser}
-              className="h-6 px-3 text-[10px] rounded-[3px]"
+              className="h-9 gap-1.5 px-4"
               title={isDemoUser ? "Demo account cannot be edited" : ""}
             >
               {saving ? "Updating..." : "Update Profile"}
@@ -238,7 +245,7 @@ const ProfilePage = () => {
               onClick={handleCancel}
               variant="outline"
               size="sm"
-              className="h-6 px-3 text-[10px] rounded-[3px]"
+              className="h-9 border-gold/40 px-4 text-gold hover:bg-[var(--accent)] hover:text-gold-soft"
             >
               Cancel
             </Button>
@@ -247,25 +254,28 @@ const ProfilePage = () => {
       </div>
 
       {/* User Basic Information Card */}
-      <Card className="text-[10px] p-0 gap-0">
-        <CardHeader className="p-2 gap-0">
-          <CardTitle className="text-[12px] font-bold">
+      <Card className="shadow-luxury">
+        <CardHeader className="p-4 pb-2">
+          <CardTitle className="font-display text-base font-semibold">
             Basic Information
           </CardTitle>
         </CardHeader>
-        {/* <Separator /> */}
-        <CardContent className="p-3 space-y-2">
-          <div className="grid grid-cols-2 gap-2">
+        <CardContent className="p-4 pt-1">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <Label className="text-[10px]">User ID</Label>
-              <div className="p-1 border border-gray-300 rounded bg-gray-50 text-[10px] min-h-[24px] flex items-center">
+              <Label className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                User ID
+              </Label>
+              <div className="mt-1.5 flex min-h-9 items-center rounded-lg border border-border bg-black/20 px-3 text-sm">
                 {userData?.user_id}
               </div>
             </div>
             <div>
-              <Label className="text-[10px]">Name</Label>
+              <Label className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                Name
+              </Label>
               {mode === "view" ? (
-                <div className="p-1 border border-gray-300 rounded bg-gray-50 text-[10px] min-h-[24px] flex items-center">
+                <div className="mt-1.5 flex min-h-9 items-center rounded-lg border border-border bg-black/20 px-3 text-sm">
                   {userData?.name}
                 </div>
               ) : (
@@ -274,14 +284,16 @@ const ProfilePage = () => {
                   onChange={(e) =>
                     setUserData({ ...userData, name: e.target.value })
                   }
-                  className="h-6 text-[10px] rounded"
+                  className="mt-1.5 h-9"
                 />
               )}
             </div>
             <div>
-              <Label className="text-[10px]">Email</Label>
+              <Label className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                Email
+              </Label>
               {mode === "view" ? (
-                <div className="p-1 border border-gray-300 rounded bg-gray-50 text-[10px] min-h-[24px] flex items-center">
+                <div className="mt-1.5 flex min-h-9 items-center rounded-lg border border-border bg-black/20 px-3 text-sm">
                   {userData?.email}
                 </div>
               ) : (
@@ -290,13 +302,15 @@ const ProfilePage = () => {
                   onChange={(e) =>
                     setUserData({ ...userData, email: e.target.value })
                   }
-                  className="h-6 text-[10px] rounded"
+                  className="mt-1.5 h-9"
                 />
               )}
             </div>
             <div>
-              <Label className="text-[10px]">Role</Label>
-              <div className="p-1 border border-gray-300 rounded bg-gray-50 text-[10px] min-h-[24px] flex items-center">
+              <Label className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                Role
+              </Label>
+              <div className="mt-1.5 flex min-h-9 items-center rounded-lg border border-border bg-black/20 px-3 text-sm">
                 {userData?.role_name}
               </div>
             </div>
@@ -306,16 +320,17 @@ const ProfilePage = () => {
 
       {/* Password Change Card */}
       {mode === "edit" && (
-        <Card className="text-[10px] p-0 gap-0">
-          <CardHeader className="p-2 gap-0">
-            <CardTitle className="text-[12px] font-bold">
+        <Card className="shadow-luxury">
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="font-display text-base font-semibold">
               Change Password
             </CardTitle>
           </CardHeader>
-          {/* <Separator /> */}
-          <CardContent className="p-3 space-y-2">
-            <div className="space-y-1">
-              <Label className="text-[10px]">Current Password</Label>
+          <CardContent className="p-4 pt-1 space-y-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                Current Password
+              </Label>
               <Input
                 type="password"
                 value={passwordData.currentPassword}
@@ -332,18 +347,20 @@ const ProfilePage = () => {
                   }
                 }}
                 placeholder="Enter current password"
-                className="h-6 text-[10px] rounded"
+                className="h-9"
               />
               {passwordErrors.currentPassword && (
-                <p className="text-[8px] text-red-500">
+                <p className="text-xs text-destructive">
                   {passwordErrors.currentPassword}
                 </p>
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <div className="space-y-1">
-                <Label className="text-[10px]">New Password</Label>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                  New Password
+                </Label>
                 <Input
                   type="password"
                   value={passwordData.newPassword}
@@ -357,16 +374,18 @@ const ProfilePage = () => {
                     }
                   }}
                   placeholder="Enter new password"
-                  className="h-6 text-[10px] rounded"
+                  className="h-9"
                 />
                 {passwordErrors.newPassword && (
-                  <p className="text-[8px] text-red-500">
+                  <p className="text-xs text-destructive">
                     {passwordErrors.newPassword}
                   </p>
                 )}
               </div>
-              <div className="space-y-1">
-                <Label className="text-[10px]">Confirm Password</Label>
+              <div className="space-y-1.5">
+                <Label className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                  Confirm Password
+                </Label>
                 <Input
                   type="password"
                   value={passwordData.confirmPassword}
@@ -383,10 +402,10 @@ const ProfilePage = () => {
                     }
                   }}
                   placeholder="Confirm new password"
-                  className="h-6 text-[10px] rounded"
+                  className="h-9"
                 />
                 {passwordErrors.confirmPassword && (
-                  <p className="text-[8px] text-red-500">
+                  <p className="text-xs text-destructive">
                     {passwordErrors.confirmPassword}
                   </p>
                 )}
@@ -397,15 +416,14 @@ const ProfilePage = () => {
       )}
 
       {/* Verification & Status Card */}
-      <Card className="text-[10px] p-0 gap-0">
-        <CardHeader className="p-2 gap-0">
-          <CardTitle className="text-[12px] font-bold">
-            Verification & Status
+      <Card className="shadow-luxury">
+        <CardHeader className="p-4 pb-2">
+          <CardTitle className="font-display text-base font-semibold">
+            Verification &amp; Status
           </CardTitle>
         </CardHeader>
-        {/* <Separator /> */}
-        <CardContent className="p-3 space-y-2">
-          <div className="flex items-center gap-2">
+        <CardContent className="p-4 pt-1 space-y-3">
+          <div className="flex items-center gap-3">
             <Checkbox
               id="isEmailVerified"
               checked={userData?.isEmailVerified || false}
@@ -413,17 +431,17 @@ const ProfilePage = () => {
                 setUserData({ ...userData, isEmailVerified: checked })
               }
               disabled={mode === "view"}
-              className="h-3 w-3 rounded"
+              className="h-4 w-4 rounded"
             />
             <Label
               htmlFor="isEmailVerified"
-              className="text-[10px] font-normal"
+              className="text-sm font-normal"
             >
               Email Verified
             </Label>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Checkbox
               id="is_default_password"
               checked={userData?.is_default_password || false}
@@ -431,17 +449,17 @@ const ProfilePage = () => {
                 setUserData({ ...userData, is_default_password: checked })
               }
               disabled={mode === "view"}
-              className="h-3 w-3 rounded"
+              className="h-4 w-4 rounded"
             />
             <Label
               htmlFor="is_default_password"
-              className="text-[10px] font-normal"
+              className="text-sm font-normal"
             >
               Using Default Password
             </Label>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Checkbox
               id="is_active"
               checked={userData?.is_active !== false}
@@ -449,16 +467,16 @@ const ProfilePage = () => {
                 setUserData({ ...userData, is_active: checked })
               }
               disabled={mode === "view"}
-              className="h-3 w-3 rounded"
+              className="h-4 w-4 rounded"
             />
-            <Label htmlFor="is_active" className="text-[10px] font-normal">
+            <Label htmlFor="is_active" className="text-sm font-normal">
               Account Active
             </Label>
           </div>
 
           {/* Account Created Info */}
-          <div className="pt-2 border-t">
-            <div className="text-[9px] text-muted-foreground grid grid-cols-2 gap-1">
+          <div className="mt-2 border-t border-border pt-4">
+            <div className="grid grid-cols-1 gap-2 text-xs text-muted-foreground sm:grid-cols-2">
               <div>
                 <span>Created:</span>
                 <span className="ml-1">
